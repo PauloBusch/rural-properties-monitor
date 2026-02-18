@@ -1,7 +1,32 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+
 var builder = WebApplication.CreateBuilder(args);
     
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
+
+//Keycloak configuration
+var keycloakSettings = builder.Configuration.GetSection("Keycloak");
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.Authority = builder.Configuration["Keycloak:Authority"];
+        options.Audience = builder.Configuration["Keycloak:Audience"];
+        options.RequireHttpsMetadata = builder.Configuration.GetValue<bool>("Keycloak:RequireHttpsMetadata");
+
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuers = keycloakSettings.GetSection("ValidIssuers").Get<string[]>(),
+            ValidateAudience = false,
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero
+        };
+    });
+
+builder.Services.AddAuthorization();
 
 // Bind KafkaConfig from configuration and register as singleton
 builder.Services.Configure<IngressApi.Models.KafkaConfig>(
@@ -33,6 +58,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+//Security - Keycloak
+app.UseAuthentication(); 
+app.UseAuthorization();
 
 app.MapControllers();
 
