@@ -13,8 +13,6 @@ public interface ISensorDataService
         CancellationToken cancellationToken = default);
 }
 
-// TODO: Implementar um tempo mínimo de persistência dos dados (ex: 1 hora) para evitar consultas com dados muito recentes e incompletos
-
 public class SensorDataService : ISensorDataService
 {
     private readonly ISensorDataRepository _repository;

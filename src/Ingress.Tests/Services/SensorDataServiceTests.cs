@@ -185,8 +185,5 @@ public class SensorDataServiceTests
         plotData.PeriodAverage.StartDate.Should().Be(startDate);
         plotData.PeriodAverage.EndDate.Should().Be(endDate);
     }
-    
-    // TODO: Adicionar o ultimo teste para verificar periodo mínimo de persistência dos dados (ex: 1 hora) para evitar consultas com dados muito recentes e incompletos
-
 }
 
