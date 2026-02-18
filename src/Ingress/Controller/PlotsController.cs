@@ -1,8 +1,10 @@
-﻿using IngressApi.Services;
+using Microsoft.AspNetCore.Authorization;
+using IngressApi.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace IngressApi.Controller;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class PlotsController : ControllerBase
