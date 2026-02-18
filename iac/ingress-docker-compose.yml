@@ -13,12 +13,17 @@ services:
       - InfluxDbConfig__Token=influxdb-token
       - InfluxDbConfig__Org=myorg
       - InfluxDbConfig__Bucket=ingress
+      - Keycloak__Authority=http://keycloak:8080/realms/RuralTech
+      - Keycloak__Audience=ruraltech-services
+      - Keycloak__ClientSecret=${KEYCLOAK_CLIENT_SECRET}
+      - Keycloak__RequireHttpsMetadata=false
     depends_on:
       - influxdb
       - kafka
       - sensors
+      - keycloak
     ports:
-      - "5001:80"
+      - "5001:8080"
 
   influxdb:
     image: influxdb:2.7
