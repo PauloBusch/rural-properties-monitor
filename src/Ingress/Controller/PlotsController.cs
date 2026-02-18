@@ -30,7 +30,7 @@ public class PlotsController : ControllerBase
 
         if (string.IsNullOrWhiteSpace(plotIds))
             return BadRequest("plotIds é obrigatório");
-
+        
         if (startDate >= endDate)
             return BadRequest("startDate deve ser anterior a endDate");
         
