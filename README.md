@@ -221,8 +221,16 @@ Os manifests estão em [`k8s/`](k8s/):
    minikube start
    ```
 2. Construa as imagens Docker dentro do Minikube:
+
+   #### Para Bash:
    ```sh
    eval $(minikube docker-env)
+   docker compose build
+   ```
+
+   #### Para PowerShell:
+   ```sh
+   minikube docker-env | Invoke-Expression
    docker compose build
    ```
    Ou manualmente:
@@ -231,7 +239,7 @@ Os manifests estão em [`k8s/`](k8s/):
    ```
 3. Aplique os manifests:
    ```sh
-   kubectl apply -f k8s/
+   kubectl apply -f k8s/ --recursive
    ```
    Ou aplique arquivos individuais conforme necessário.
 4. Verifique pods e serviços:
@@ -243,15 +251,29 @@ Os manifests estão em [`k8s/`](k8s/):
    ```sh
    minikube service ingress-api
    ```
-   ### Dicas rápidas para troubleshooting no Minikube/Kubernetes
+6. Abra o dashboard do Minikube (interface web para monitoramento):
+   ```sh
+   minikube dashboard
+   ```
+7. Parar o Minikube:
+   ```sh
+   minikube stop
+   ```
+8. Remover o cluster Minikube:
+   ```sh
+   minikube delete
+   ```
 
-   - Remover recursos: `kubectl delete -f <arquivo.yaml>`
-   - Ver logs de pods: `kubectl logs <nome-do-pod>`
-   - Verificar status dos pods: `kubectl get pods`
-   - Port-forward para acessar serviços localmente: `kubectl port-forward svc/<serviço> <porta-local>:<porta-serviço>`
-   - Escalar pods alterando `replicas` nos Deployments e aplicando novamente: `kubectl apply -f <deployment.yaml>`
-   - Verificar eventos e erros: `kubectl describe pod <nome-do-pod>`
-   - Verificar serviços expostos: `kubectl get svc`
+### Dicas rápidas para troubleshooting no Minikube/Kubernetes
+
+- Remover recursos: `kubectl delete -f <arquivo.yaml>`
+- Ver logs de pods: `kubectl logs <nome-do-pod>`
+- Verificar status dos pods: `kubectl get pods`
+- Port-forward para acessar serviços localmente: `kubectl port-forward svc/<serviço> <porta-local>:<porta-serviço>`
+- Escalar pods alterando `replicas` nos Deployments e aplicando novamente: `kubectl apply -f <deployment.yaml>`
+- Verificar eventos e erros: `kubectl describe pod <nome-do-pod>`
+- Verificar serviços expostos: `kubectl get svc`
+
 
 
 ## Autores

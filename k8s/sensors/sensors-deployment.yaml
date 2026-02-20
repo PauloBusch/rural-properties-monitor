@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: sensors
-          image: sensors:latest
+          image: rural-properties-monitor-sensors:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80
