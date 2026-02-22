@@ -21,7 +21,9 @@ jobs:
           reportgenerator -reports:./**/coverage.cobertura.xml -targetdir:./TestResults/CoverageReport -reporttypes:lcov
 
       - name: Set up Minikube Docker environment
-        run: eval $(minikube docker-env)
+        run: |
+          & minikube docker-env | Invoke-Expression
+        shell: pwsh
 
       - name: Build all images with Docker Compose
         run: docker compose build
