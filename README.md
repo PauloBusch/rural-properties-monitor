@@ -14,13 +14,75 @@
    - [Como instalar um novo agente](#como-instalar-um-novo-agente-self-hosted-runner)
 - [Autores](#autores)
 
+
+
 ## Visão Geral
 
-O sistema é composto por uma arquitetura baseada em microsserviços, orientada a eventos e preparada para ingestão e análise de dados de sensores em propriedades rurais. O diagrama abaixo representa os principais componentes e seus fluxos de comunicação.
+O sistema utiliza uma arquitetura de microsserviços orientada a eventos, preparada para ingestão e análise de dados de sensores em propriedades rurais.
 
-A proposta é permitir que dados coletados em campo (sensores) sejam ingeridos, armazenados, processados e posteriormente consumidos por produtores rurais através de uma API centralizada.
+### 1. Coleta e Ingestão de Dados
 
-![Diagrama da Arquitetura](architecture-diagram.drawio.png)
+```mermaid
+flowchart LR
+   SENSORS[📟 Sensors]
+   KAFKA[🟧 Kafka]
+   INGRESS[🔷 Ingress API]
+   SENSORS -- Dados de sensores --> KAFKA
+   KAFKA -- Eventos --> INGRESS
+```
+*Sensores enviam dados para o Kafka, que são consumidos pela Ingress API.*
+
+### 2. Armazenamento de Séries Temporais
+
+```mermaid
+flowchart LR
+   INGRESS[🔷 Ingress API] -- Séries temporais --> INFLUX[🟦 InfluxDB]
+```
+*Ingress API armazena dados de sensores no InfluxDB.*
+
+### 3. Consulta, Consolidação e Cache de Dados
+
+```mermaid
+flowchart LR
+   ANALYTICS[🔷 Analytics API]
+   INGRESS[🔷 Ingress API]
+   PROPERTIES[🔷 Properties API]
+   REDIS[🟥 Redis]
+   MONGO[🟪 MongoDB]
+   ANALYTICS -- Consulta sensores --> INGRESS
+   ANALYTICS -- Consulta propriedades --> PROPERTIES
+   PROPERTIES -- Dados cadastrais --> MONGO
+   ANALYTICS -- Cache --> REDIS
+```
+*Analytics API consulta dados de sensores e propriedades, consolida e utiliza Redis como cache.*
+
+### 4. Entrega ao Usuário Final
+
+```mermaid
+flowchart LR
+   ANALYTICS[🔷 Analytics API] -- Dados consolidados --> USER[👤 Produtor Rural]
+```
+*Produtor rural consome dados consolidados via Analytics API.*
+
+### 5. Autenticação e Autorização
+
+```mermaid
+flowchart LR
+   KEYCLOAK[🛡️ Keycloak]
+   POSTGRES[🐘 PostgreSQL]
+   USER[👤 Produtor Rural]
+   ANALYTICS[🔷 Analytics API]
+   PROPERTIES[🔷 Properties API]
+   INGRESS[🔷 Ingress API]
+   KEYCLOAK -- Auth --> USER
+   KEYCLOAK -- IAM --> ANALYTICS
+   KEYCLOAK -- IAM --> PROPERTIES
+   KEYCLOAK -- IAM --> INGRESS
+   KEYCLOAK -- DB --> POSTGRES
+```
+*Keycloak gerencia autenticação/autorização de todos os serviços e usuários, usando PostgreSQL como backend.*
+
+> Veja também o diagrama visual: ![Diagrama da Arquitetura](architecture-diagram.drawio.png)
 
 ## Componentes
 
@@ -290,8 +352,8 @@ graph TD
    C --> D[Runner self-hosted]
    D --> E[dotnet test com cobertura]
    E --> F[Gerar relatório de cobertura]
-   F --> G[Build imagens (docker compose)]
-   G --> H[Aplicar manifests (kubectl apply)]
+   F --> G[Build imagens docker compose]
+   G --> H[Aplicar manifests kubectl apply]
    H --> I[Minikube atualizado]
 ```
 
