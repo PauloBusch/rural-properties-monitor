@@ -15,12 +15,12 @@ jobs:
         run: |
           dotnet test --collect:"XPlat Code Coverage" --logger "trx;LogFileName=test_results.trx" --results-directory ./TestResults
 
-      - name: Convert coverage to lcov
+      - name: Generate HTML coverage report
         run: |
           dotnet tool install --global dotnet-reportgenerator-globaltool
-          reportgenerator -reports:./**/coverage.cobertura.xml -targetdir:./TestResults/CoverageReport -reporttypes:lcov
+          reportgenerator -reports:./**/coverage.cobertura.xml -targetdir:./TestResults/CoverageReport -reporttypes:Html
 
-      - name: Upload coverage report
+      - name: Upload HTML coverage report
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report
