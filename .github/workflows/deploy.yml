@@ -19,8 +19,6 @@ jobs:
         run: |
           dotnet tool install --global dotnet-reportgenerator-globaltool
           reportgenerator -reports:./**/coverage.cobertura.xml -targetdir:./TestResults/CoverageReport -reporttypes:lcov
-        env:
-          PATH: $PATH:/home/runner/.dotnet/tools
 
       - name: Set up Minikube Docker environment
         run: eval $(minikube docker-env)

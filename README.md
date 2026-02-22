@@ -358,9 +358,12 @@ Os manifests estão em [`k8s/`](k8s/):
 - Verificar eventos e erros: `kubectl describe pod <nome-do-pod>`
 - Verificar serviços expostos: `kubectl get svc`
 
+
 ## CI/CD Workflow (Minikube + Self-hosted Runner)
 
 O projeto utiliza CI/CD automatizado para build, deploy e atualização do cluster Minikube local via GitHub Actions com runner self-hosted.
+
+> Veja o arquivo do workflow: [.github/workflows/deploy.yml](.github/workflows/deploy.yml)
 
 
 ### Como funciona o workflow
