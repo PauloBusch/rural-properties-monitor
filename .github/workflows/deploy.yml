@@ -20,6 +20,12 @@ jobs:
           dotnet tool install --global dotnet-reportgenerator-globaltool
           reportgenerator -reports:./**/coverage.cobertura.xml -targetdir:./TestResults/CoverageReport -reporttypes:lcov
 
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report
+          path: ./TestResults/CoverageReport
+
       - name: Set up Minikube Docker environment
         run: |
           & minikube docker-env | Invoke-Expression
