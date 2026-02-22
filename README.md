@@ -6,10 +6,12 @@
 - [Componentes](#componentes)
 - [Fluxo Geral de Dados](#fluxo-geral-de-dados)
 - [Infraestrutura como Código (IaC)](#infraestrutura-como-código-iac)
-  - [Como iniciar todos os serviços](#como-iniciar-todos-os-serviços)
-  - [Como iniciar apenas serviços específicos](#como-iniciar-apenas-serviços-específicos)
-  - [Como parar e remover os containers](#como-parar-e-remover-os-containers)
+   - [Como iniciar todos os serviços](#como-iniciar-todos-os-serviços)
+   - [Como iniciar apenas serviços específicos](#como-iniciar-apenas-serviços-específicos)
+   - [Como parar e remover os containers](#como-parar-e-remover-os-containers)
 - [Kubernetes & Minikube](#kubernetes--minikube)
+- [CI/CD Workflow](#cicd-workflow-minikube--self-hosted-runner)
+   - [Como instalar um novo agente](#como-instalar-um-novo-agente-self-hosted-runner)
 - [Autores](#autores)
 
 ## Visão Geral
@@ -274,7 +276,58 @@ Os manifests estão em [`k8s/`](k8s/):
 - Verificar eventos e erros: `kubectl describe pod <nome-do-pod>`
 - Verificar serviços expostos: `kubectl get svc`
 
+## CI/CD Workflow (Minikube + Self-hosted Runner)
 
+O projeto utiliza CI/CD automatizado para build, deploy e atualização do cluster Minikube local via GitHub Actions com runner self-hosted.
+
+
+### Como funciona o workflow
+
+```mermaid
+graph TD
+   A[Dev faz push] --> B[GitHub]
+   B --> C[GitHub Actions]
+   C --> D[Runner self-hosted]
+   D --> E[dotnet test com cobertura]
+   E --> F[Gerar relatório de cobertura]
+   F --> G[Build imagens (docker compose)]
+   G --> H[Aplicar manifests (kubectl apply)]
+   H --> I[Minikube atualizado]
+```
+
+Passos do pipeline:
+
+1. O desenvolvedor faz push para o GitHub.
+2. O GitHub aciona o workflow.
+3. O runner self-hosted executa o pipeline na sua máquina.
+4. Executa os testes automatizados com cobertura de código.
+5. Gera o relatório de cobertura (lcov).
+6. Constrói todas as imagens dos serviços usando Docker Compose.
+7. Aplica todos os manifests do Kubernetes (kubectl apply -f k8s/ --recursive).
+8. O Minikube executa a nova versão automaticamente.
+
+
+### Como instalar um novo agente (self-hosted runner)
+
+1. No GitHub, acesse o repositório do projeto.
+2. Vá em **Settings** → **Actions** → **Runners** → **New self-hosted runner**.
+3. Siga as instruções para baixar, configurar e rodar o agente (Linux recomendado). Veja o [guia oficial](https://docs.github.com/pt/actions/hosting-your-own-runners/adding-self-hosted-runners).
+4. O agente precisa ter Docker, kubectl e Minikube instalados e acessíveis.
+5. O runner ficará disponível no GitHub para executar os workflows.
+
+Se precisar de mais agentes, repita o processo em outras máquinas.
+
+Erros comuns:
+- Runner não acessa cluster: verifique se o contexto do kubectl é o minikube.
+- Docker não encontrado: verifique se o runner está usando o ambiente do Minikube.
+- Pods antigos: use `kubectl rollout restart deployment`.
+
+Se precisar de mais agentes, repita o processo em outras máquinas.
+
+Erros comuns:
+- Runner não acessa cluster: verifique se o contexto do kubectl é o minikube
+- Docker não encontrado: verifique se o runner está usando o ambiente do Minikube
+- Pods antigos: use kubectl rollout restart deployment
 
 ## Autores
 
