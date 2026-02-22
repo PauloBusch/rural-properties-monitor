@@ -23,7 +23,7 @@ jobs:
       - name: Set up Minikube Docker environment
         run: |
           & minikube docker-env | Invoke-Expression
-        shell: pwsh
+        shell: powershell
 
       - name: Build all images with Docker Compose
         run: docker compose build
