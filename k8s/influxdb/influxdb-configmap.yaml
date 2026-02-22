@@ -6,6 +6,7 @@ metadata:
     app: influxdb
   namespace: default
 data:
+  DOCKER_INFLUXDB_INIT_MODE: setup
   DOCKER_INFLUXDB_INIT_ORG: myorg
   DOCKER_INFLUXDB_INIT_BUCKET: ingress
   INFLUXDB_URL: http://influxdb:8086
