@@ -26,13 +26,11 @@ jobs:
           name: coverage-report
           path: ./TestResults/CoverageReport
 
-      - name: Set up Minikube Docker environment
+      - name: Build all images with Docker Compose (Minikube context)
         run: |
           & minikube docker-env | Invoke-Expression
+          docker compose build
         shell: powershell
-
-      - name: Build all images with Docker Compose
-        run: docker compose build
 
       - name: Apply all Kubernetes manifests
         run: kubectl apply -f k8s/ --recursive
