@@ -1,24 +1,114 @@
 # Projeto Hackathon para Monitoramento de Propriedades Rurais
 
-## Sumário
+<p align="left">
+    <a href="https://github.com/PauloBusch/rural-properties-monitor/actions/workflows/deploy.yml">
+        <img src="https://img.shields.io/github/actions/workflow/status/PauloBusch/rural-properties-monitor/deploy.yml?label=CI%2FCD%20-%20Test%2C%20Build%20and%20Deploy%20to%20Minikube&style=for-the-badge&logo=github" alt="CI/CD - Test, Build and Deploy to Minikube"/>
+    </a>
+</p>
 
+## Sumário
 - [Visão Geral](#visão-geral)
+   - [Coleta e Ingestão de Dados](#1-coleta-e-ingestão-de-dados)
+   - [Armazenamento de Séries Temporais](#2-armazenamento-de-séries-temporais)
+   - [Consulta, Consolidação e Cache de Dados](#3-consulta-consolidação-e-cache-de-dados)
+   - [Entrega ao Usuário Final](#4-entrega-ao-usuário-final)
+   - [Autenticação e Autorização](#5-autenticação-e-autorização)
 - [Componentes](#componentes)
+   - 👤 [Rural Producer](#-rural-producer)
+   - 🔷 [Analytics API](#-analytics-api)
+   - 🟥 [Redis](#-redis)
+   - 🔷 [Properties API](#-properties-api)
+   - 🟪 [MongoDB](#-mongodb)
+   - 🔷 [Ingress API](#-ingress-api)
+   - 🟦 [InfluxDB](#-influxdb)
+   - 🟧 [Kafka](#-kafka)
+   - 📟 [Sensors](#-sensors)
+   - 🛡️ [Keycloak](#-keycloak)
+   - 🐘 [PostgreSQL](#-postgresql)
 - [Fluxo Geral de Dados](#fluxo-geral-de-dados)
 - [Infraestrutura como Código (IaC)](#infraestrutura-como-código-iac)
-  - [Como iniciar todos os serviços](#como-iniciar-todos-os-serviços)
-  - [Como iniciar apenas serviços específicos](#como-iniciar-apenas-serviços-específicos)
-  - [Como parar e remover os containers](#como-parar-e-remover-os-containers)
+   - [Como iniciar todos os serviços](#como-iniciar-todos-os-serviços)
+   - [Como iniciar apenas serviços específicos](#como-iniciar-apenas-serviços-específicos)
+   - [Como parar e remover os containers](#como-parar-e-remover-os-containers)
 - [Kubernetes & Minikube](#kubernetes--minikube)
+   - [O que é Minikube?](#o-que-é-minikube)
+   - [Organização dos Manifests](#organização-dos-manifests)
+   - [Como rodar no Minikube](#como-rodar-no-minikube)
+   - [Dicas rápidas para troubleshooting no Minikube/Kubernetes](#dicas-rápidas-para-troubleshooting-no-minikubekubernetes)
+- [CI/CD Workflow (Minikube + Self-hosted Runner)](#cicd-workflow-minikube--self-hosted-runner)
+   - [Como funciona o workflow](#como-funciona-o-workflow)
+   - [Como instalar um novo agente (self-hosted runner)](#como-instalar-um-novo-agente-self-hosted-runner)
 - [Autores](#autores)
+
+
 
 ## Visão Geral
 
-O sistema é composto por uma arquitetura baseada em microsserviços, orientada a eventos e preparada para ingestão e análise de dados de sensores em propriedades rurais. O diagrama abaixo representa os principais componentes e seus fluxos de comunicação.
+O sistema utiliza uma arquitetura de microsserviços orientada a eventos, preparada para ingestão e análise de dados de sensores em propriedades rurais.
 
-A proposta é permitir que dados coletados em campo (sensores) sejam ingeridos, armazenados, processados e posteriormente consumidos por produtores rurais através de uma API centralizada.
+### 1. Coleta e Ingestão de Dados
 
-![Diagrama da Arquitetura](architecture-diagram.drawio.png)
+```mermaid
+flowchart LR
+   SENSORS[📟 Sensors]
+   KAFKA[🟧 Kafka]
+   INGRESS[🔷 Ingress API]
+   SENSORS -- Dados de sensores --> KAFKA
+   KAFKA -- Eventos --> INGRESS
+```
+*Sensores enviam dados para o Kafka, que são consumidos pela Ingress API.*
+
+### 2. Armazenamento de Séries Temporais
+
+```mermaid
+flowchart LR
+   INGRESS[🔷 Ingress API] -- Séries temporais --> INFLUX[🟦 InfluxDB]
+```
+*Ingress API armazena dados de sensores no InfluxDB.*
+
+### 3. Consulta, Consolidação e Cache de Dados
+
+```mermaid
+flowchart LR
+   ANALYTICS[🔷 Analytics API]
+   INGRESS[🔷 Ingress API]
+   PROPERTIES[🔷 Properties API]
+   REDIS[🟥 Redis]
+   MONGO[🟪 MongoDB]
+   ANALYTICS -- Consulta sensores --> INGRESS
+   ANALYTICS -- Consulta propriedades --> PROPERTIES
+   PROPERTIES -- Dados cadastrais --> MONGO
+   ANALYTICS -- Cache --> REDIS
+```
+*Analytics API consulta dados de sensores e propriedades, consolida e utiliza Redis como cache.*
+
+### 4. Entrega ao Usuário Final
+
+```mermaid
+flowchart LR
+   ANALYTICS[🔷 Analytics API] -- Dados consolidados --> USER[👤 Produtor Rural]
+```
+*Produtor rural consome dados consolidados via Analytics API.*
+
+### 5. Autenticação e Autorização
+
+```mermaid
+flowchart LR
+   KEYCLOAK[🛡️ Keycloak]
+   POSTGRES[🐘 PostgreSQL]
+   USER[👤 Produtor Rural]
+   ANALYTICS[🔷 Analytics API]
+   PROPERTIES[🔷 Properties API]
+   INGRESS[🔷 Ingress API]
+   KEYCLOAK -- Auth --> USER
+   KEYCLOAK -- IAM --> ANALYTICS
+   KEYCLOAK -- IAM --> PROPERTIES
+   KEYCLOAK -- IAM --> INGRESS
+   KEYCLOAK -- DB --> POSTGRES
+```
+*Keycloak gerencia autenticação/autorização de todos os serviços e usuários, usando PostgreSQL como backend.*
+
+> Veja também o diagrama visual: ![Diagrama da Arquitetura](architecture-diagram.drawio.png)
 
 ## Componentes
 
@@ -221,8 +311,16 @@ Os manifests estão em [`k8s/`](k8s/):
    minikube start
    ```
 2. Construa as imagens Docker dentro do Minikube:
+
+   #### Para Bash:
    ```sh
    eval $(minikube docker-env)
+   docker compose build
+   ```
+
+   #### Para PowerShell:
+   ```sh
+   minikube docker-env | Invoke-Expression
    docker compose build
    ```
    Ou manualmente:
@@ -231,7 +329,7 @@ Os manifests estão em [`k8s/`](k8s/):
    ```
 3. Aplique os manifests:
    ```sh
-   kubectl apply -f k8s/
+   kubectl apply -f k8s/ --recursive
    ```
    Ou aplique arquivos individuais conforme necessário.
 4. Verifique pods e serviços:
@@ -243,16 +341,84 @@ Os manifests estão em [`k8s/`](k8s/):
    ```sh
    minikube service ingress-api
    ```
-   ### Dicas rápidas para troubleshooting no Minikube/Kubernetes
+6. Abra o dashboard do Minikube (interface web para monitoramento):
+   ```sh
+   minikube dashboard
+   ```
+7. Parar o Minikube:
+   ```sh
+   minikube stop
+   ```
+8. Remover o cluster Minikube:
+   ```sh
+   minikube delete
+   ```
 
-   - Remover recursos: `kubectl delete -f <arquivo.yaml>`
-   - Ver logs de pods: `kubectl logs <nome-do-pod>`
-   - Verificar status dos pods: `kubectl get pods`
-   - Port-forward para acessar serviços localmente: `kubectl port-forward svc/<serviço> <porta-local>:<porta-serviço>`
-   - Escalar pods alterando `replicas` nos Deployments e aplicando novamente: `kubectl apply -f <deployment.yaml>`
-   - Verificar eventos e erros: `kubectl describe pod <nome-do-pod>`
-   - Verificar serviços expostos: `kubectl get svc`
+### Dicas rápidas para troubleshooting no Minikube/Kubernetes
 
+- Remover recursos: `kubectl delete -f <arquivo.yaml>`
+- Ver logs de pods: `kubectl logs <nome-do-pod>`
+- Verificar status dos pods: `kubectl get pods`
+- Port-forward para acessar serviços localmente: `kubectl port-forward svc/<serviço> <porta-local>:<porta-serviço>`
+- Escalar pods alterando `replicas` nos Deployments e aplicando novamente: `kubectl apply -f <deployment.yaml>`
+- Verificar eventos e erros: `kubectl describe pod <nome-do-pod>`
+- Verificar serviços expostos: `kubectl get svc`
+
+
+## CI/CD Workflow (Minikube + Self-hosted Runner)
+
+O projeto utiliza CI/CD automatizado para build, deploy e atualização do cluster Minikube local via GitHub Actions com runner self-hosted.
+
+> Veja o arquivo do workflow: [.github/workflows/deploy.yml](.github/workflows/deploy.yml)
+
+
+### Como funciona o workflow
+
+```mermaid
+graph TD
+   A[Dev faz push] --> B[GitHub]
+   B --> C[GitHub Actions]
+   C --> D[Runner self-hosted]
+   D --> E[dotnet test com cobertura]
+   E --> F[Gerar relatório de cobertura]
+   F --> G[Build imagens docker compose]
+   G --> H[Aplicar manifests kubectl apply]
+   H --> I[Minikube atualizado]
+```
+
+Passos do pipeline:
+
+1. O desenvolvedor faz push para o GitHub.
+2. O GitHub aciona o workflow.
+3. O runner self-hosted executa o pipeline na sua máquina.
+4. Executa os testes automatizados com cobertura de código.
+5. Gera o relatório de cobertura (lcov).
+6. Constrói todas as imagens dos serviços usando Docker Compose.
+7. Aplica todos os manifests do Kubernetes (kubectl apply -f k8s/ --recursive).
+8. O Minikube executa a nova versão automaticamente.
+
+
+### Como instalar um novo agente (self-hosted runner)
+
+1. No GitHub, acesse o repositório do projeto.
+2. Vá em **Settings** → **Actions** → **Runners** → **New self-hosted runner**.
+3. Siga as instruções para baixar, configurar e rodar o agente (Linux recomendado). Veja o [guia oficial](https://docs.github.com/pt/actions/hosting-your-own-runners/adding-self-hosted-runners).
+4. O agente precisa ter Docker, kubectl e Minikube instalados e acessíveis.
+5. O runner ficará disponível no GitHub para executar os workflows.
+
+Se precisar de mais agentes, repita o processo em outras máquinas.
+
+Erros comuns:
+- Runner não acessa cluster: verifique se o contexto do kubectl é o minikube.
+- Docker não encontrado: verifique se o runner está usando o ambiente do Minikube.
+- Pods antigos: use `kubectl rollout restart deployment`.
+
+Se precisar de mais agentes, repita o processo em outras máquinas.
+
+Erros comuns:
+- Runner não acessa cluster: verifique se o contexto do kubectl é o minikube
+- Docker não encontrado: verifique se o runner está usando o ambiente do Minikube
+- Pods antigos: use kubectl rollout restart deployment
 
 ## Autores
 
