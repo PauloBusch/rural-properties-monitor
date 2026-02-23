@@ -17,6 +17,6 @@ spec:
       containers:
         - name: analytics-api
           image: rural-properties-monitor-analytics:latest
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8081
