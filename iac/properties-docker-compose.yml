@@ -1,19 +1,31 @@
 services:
-  # TODO: Configure container service
+  # Microsserviço de Properties
+  properties-api:
+    image: rural-monitor-properties
+    build:
+      context: ../src/Properties
+      dockerfile: Dockerfile
+    container_name: properties-service
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - MongoDbSettings__ConnectionString=mongodb://admin:adminpassmongo@mongodb-db:27017
+      - MongoDbSettings__DatabaseName=properties_db
+    ports:
+      - "8081:8080" 
+    depends_on:
+      - mongodb-db
 
-  mysql:
-    image: mysql:8.0
-    container_name: mysql-db
+  mongodb-db:
+    image: mongo:latest
+    container_name: mongodb-db
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: properties_db
-      MYSQL_USER: user
-      MYSQL_PASSWORD: userpassword
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=adminpassmongo
     ports:
-      - "3306:3306"
+      - "27017:27017"
     volumes:
-      - mysql_data:/var/lib/mysql
+      - mongodb_data:/data/db
 
 volumes:
-  mysql_data:
+  mongodb_data:
