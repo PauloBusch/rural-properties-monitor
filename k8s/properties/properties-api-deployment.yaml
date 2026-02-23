@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: properties-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: properties-api
+  template:
+    metadata:
+      labels:
+        app: properties-api
+    spec:
+      containers:
+        - name: properties-api
+          image: rural-monitor-properties:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: Development
+            - name: MongoDbSettings__ConnectionString
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-secret
+                  key: connectionString
+            - name: MongoDbSettings__DatabaseName
+              valueFrom:
+                configMapKeyRef:
+                  name: mongodb-config
+                  key: database-name
+          envFrom:
+            - secretRef:
+                name: mongodb-secret
+      # Add other environment variables as needed
