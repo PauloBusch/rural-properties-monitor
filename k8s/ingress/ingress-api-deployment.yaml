@@ -17,7 +17,7 @@ spec:
       containers:
         - name: ingress-api
           image: rural-properties-monitor-ingress:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - containerPort: 80
           env:

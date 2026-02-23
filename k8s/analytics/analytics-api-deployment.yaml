@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: analytics-api
+  labels:
+    app: analytics-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: analytics-api
+  template:
+    metadata:
+      labels:
+        app: analytics-api
+    spec:
+      containers:
+        - name: analytics-api
+          image: rural-properties-monitor-analytics:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8081
