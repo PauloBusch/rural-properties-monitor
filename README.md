@@ -1,5 +1,11 @@
 # Projeto Hackathon para Monitoramento de Propriedades Rurais
 
+<p align="left">
+    <a href="https://github.com/PauloBusch/rural-properties-monitor/actions/workflows/deploy.yml">
+        <img src="https://img.shields.io/github/actions/workflow/status/PauloBusch/rural-properties-monitor/deploy.yml?label=CI%2FCD%20-%20Test%2C%20Build%20and%20Deploy%20to%20Minikube&style=for-the-badge&logo=github" alt="CI/CD - Test, Build and Deploy to Minikube"/>
+    </a>
+</p>
+
 ## Sumário
 - [Visão Geral](#visão-geral)
    - [Coleta e Ingestão de Dados](#1-coleta-e-ingestão-de-dados)
