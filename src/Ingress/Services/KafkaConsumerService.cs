@@ -24,6 +24,9 @@ namespace IngressApi.Services
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            // Yield para não bloquear a inicialização da aplicação (Swagger, controllers, etc.)
+            await Task.Yield();
+
             var conf = new ConsumerConfig
             {
                 BootstrapServers = _kafkaConfig.Broker,
@@ -31,31 +34,54 @@ namespace IngressApi.Services
                 AutoOffsetReset = AutoOffsetReset.Earliest
             };
 
-            using var consumer = new ConsumerBuilder<Ignore, string>(conf).Build();
-            consumer.Subscribe(_kafkaConfig.Topic);
-
             while (!stoppingToken.IsCancellationRequested)
             {
                 try
                 {
-                    var result = consumer.Consume(stoppingToken);
-                    var data = JsonSerializer.Deserialize<SensorDataPayload>(result.Message.Value);
-                    _logger.LogInformation("Received message: {Message}", result.Message.Value);
-                    _logger.LogInformation("Deserialized data: {@Data}", data);
+                    _logger.LogInformation("Connecting to Kafka broker at {Broker}...", _kafkaConfig.Broker);
 
-                    if (data != null)
+                    using var consumer = new ConsumerBuilder<Ignore, string>(conf).Build();
+                    consumer.Subscribe(_kafkaConfig.Topic);
+
+                    _logger.LogInformation("Connected to Kafka. Consuming topic '{Topic}'...", _kafkaConfig.Topic);
+
+                    while (!stoppingToken.IsCancellationRequested)
                     {
-                        await _repository.SaveAsync(data, stoppingToken);
-                        _logger.LogInformation("Data saved to InfluxDB.");
+                        try
+                        {
+                            var result = consumer.Consume(stoppingToken);
+                            var data = JsonSerializer.Deserialize<SensorDataPayload>(result.Message.Value);
+                            _logger.LogInformation("Received message: {Message}", result.Message.Value);
+                            _logger.LogInformation("Deserialized data: {@Data}", data);
+
+                            if (data != null)
+                            {
+                                await _repository.SaveAsync(data, stoppingToken);
+                                _logger.LogInformation("Data saved to InfluxDB.");
+                            }
+                        }
+                        catch (ConsumeException ex)
+                        {
+                            _logger.LogError(ex, "Kafka consume error: {Reason}", ex.Error.Reason);
+                        }
                     }
                 }
-                catch (ConsumeException ex)
+                catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
                 {
-                    _logger.LogError(ex, "Kafka consume error: {Reason}", ex.Error.Reason);
+                    // Shutdown gracioso — não logar como erro
+                    break;
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Unexpected error while consuming Kafka message.");
+                    _logger.LogError(ex, "Kafka connection failed. Retrying in 10 seconds...");
+                    try
+                    {
+                        await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        break;
+                    }
                 }
             }
         }
