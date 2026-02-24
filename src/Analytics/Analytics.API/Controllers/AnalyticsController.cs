@@ -10,10 +10,13 @@ namespace Analytics.API.Controllers;
 public class AnalyticsController : ControllerBase
 {
     private readonly AnalyticsService _analyticsService;
+    private readonly ILogger<AnalyticsController> _logger;
 
-    public AnalyticsController(AnalyticsService analyticsService)
+    public AnalyticsController(AnalyticsService analyticsService, ILogger<AnalyticsController> logger)
     {
         _analyticsService = analyticsService;
+        _logger = logger;
+
     }
 
     /// <summary>
@@ -26,11 +29,25 @@ public class AnalyticsController : ControllerBase
         [FromQuery] DateTime endDate,
         CancellationToken cancellationToken)
     {
+        _logger.LogInformation(
+            "Request received for sensor data. Plots: {PlotIds}, StartDate: {StartDate}, EndDate: {EndDate}",
+            plotIds,
+            startDate,
+            endDate);
+
         if (plotIds == null || !plotIds.Any())
-            return BadRequest("plotIds é obrigatório");
+        {
+            _logger.LogWarning("Invalid request: plotIds is empty");
+            return BadRequest("plotIds is required");
+        }            
 
         if (startDate >= endDate)
-            return BadRequest("startDate deve ser anterior a endDate");
+        {
+            _logger.LogWarning("Invalid request: startDate >= endDate");
+            return BadRequest("startDate must be earlier than endDate");
+
+        }
+            
 
         var token = HttpContext.Request.Headers["Authorization"]
             .ToString()
@@ -42,6 +59,8 @@ public class AnalyticsController : ControllerBase
             endDate,
             token,
             cancellationToken);
+
+        _logger.LogInformation("Sensor data successfully retrieved");
 
         return Ok(result);
     }
