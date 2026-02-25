@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Analytics.Application.Services;
 
-public class AnalyticsService
+public class AnalyticsService : IAnalyticsService
 {
     private readonly IIngressApiClient _ingressApiClient;
     private readonly IDistributedCache _cache;

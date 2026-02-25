@@ -23,7 +23,7 @@ public class IngressApiClient : IIngressApiClient
         if (plotIds == null || !plotIds.Any())
             throw new ArgumentException("plotIds cannot be empty");
 
-        var query = $"api/plots/sensor-data?" +
+        var query = $"https://localhost:44396/api/plots/sensor-data?" +
                     $"plotIds={string.Join(",", plotIds)}" +
                     $"&startDate={startDate:O}" +
                     $"&endDate={endDate:O}";

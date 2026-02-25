@@ -1,18 +1,17 @@
-﻿using Analytics.Application.Services;
-using Microsoft.AspNetCore.Authorization;
+﻿using Analitycs.Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Analytics.API.Controllers;
 
-[Authorize]
+//[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class AnalyticsController : ControllerBase
 {
-    private readonly AnalyticsService _analyticsService;
+    private readonly IAnalyticsService _analyticsService;
     private readonly ILogger<AnalyticsController> _logger;
 
-    public AnalyticsController(AnalyticsService analyticsService, ILogger<AnalyticsController> logger)
+    public AnalyticsController(IAnalyticsService analyticsService, ILogger<AnalyticsController> logger)
     {
         _analyticsService = analyticsService;
         _logger = logger;
