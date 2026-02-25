@@ -245,6 +245,10 @@ O projeto utiliza Docker Compose para orquestrar todos os serviços. O arquivo p
 - [`iac/keycloak-docker-compose.yml`](iac/keycloak-docker-compose.yml)
 - [`iac/properties-docker-compose.yml`](iac/properties-docker-compose.yml)
 - [`iac/sensors-docker-compose.yml`](iac/sensors-docker-compose.yml)
+- [`iac/observability-docker-compose.yml`](iac/observability-docker-compose.yml)
+
+> **Observabilidade:**
+> Os serviços de observabilidade (Prometheus e Grafana) agora estão definidos separadamente em [`iac/observability-docker-compose.yml`](iac/observability-docker-compose.yml). Suba este arquivo para monitoramento e dashboards.
 
 ### Como iniciar todos os serviços
 
