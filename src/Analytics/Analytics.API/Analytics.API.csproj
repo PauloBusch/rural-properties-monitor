@@ -25,7 +25,6 @@
   <ItemGroup>
     <Folder Include="Contracts\" />
     <Folder Include="Mappings\" />
-    <Folder Include="_Common\" />
   </ItemGroup>
 
   <ItemGroup>
