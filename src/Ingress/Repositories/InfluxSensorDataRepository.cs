@@ -102,7 +102,6 @@ namespace IngressApi.Repositories
             var results = new List<SensorDataPayload>();
             var queryApi = _client.GetQueryApi();
 
-            // Busca dados amplos para diagnóstico (inclui futuro para cobrir diferenças de timezone)
             var futureStop = DateTime.UtcNow.AddDays(30).ToString("yyyy-MM-ddTHH:mm:ssZ");
             var fluxQuery = $@"
                 from(bucket: ""{_config.Bucket}"")

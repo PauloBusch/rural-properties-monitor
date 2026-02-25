@@ -1,6 +1,5 @@
 namespace IngressApi.DTO;
 
-// Resposta com dados agregados de sensores
 public class SensorDataResponse
 {
     public string PlotId { get; set; } = string.Empty;
@@ -8,7 +7,6 @@ public class SensorDataResponse
     public PeriodAverage PeriodAverage { get; set; } = new();
 }
 
-// Média por hora
 public class HourlyAverage
 {
     public DateTime Hour { get; set; }
@@ -17,7 +15,6 @@ public class HourlyAverage
     public double Precipitation { get; set; }
 }
 
-// Média do período completo
 public class PeriodAverage
 {
     public DateTime StartDate { get; set; }

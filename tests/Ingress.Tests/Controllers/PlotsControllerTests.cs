@@ -1,6 +1,7 @@
 ﻿using FluentAssertions;
 using IngressApi.Controller;
 using IngressApi.DTO;
+using IngressApi.Repositories;
 using IngressApi.Services;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
@@ -11,26 +12,28 @@ namespace Ingress.Tests.Controllers;
 public class PlotsControllerTests
 {
     private readonly Mock<ISensorDataService> _serviceMock;
+    private readonly Mock<ISensorDataRepository> _repositoryMock;
     private readonly PlotsController _controller;
 
     public PlotsControllerTests()
     {
         _serviceMock = new Mock<ISensorDataService>();
-        _controller = new PlotsController(_serviceMock.Object);
+        _repositoryMock = new Mock<ISensorDataRepository>();
+        _controller = new PlotsController(_serviceMock.Object, _repositoryMock.Object);
     }
 
     [Fact]
     public async Task GetSensorData_WithValidParameters_ReturnsOkResult()
     {
         // Arrange
-        var plotIds = "plot1,plot2";
+        var plotIds = "plot-001,plot-002";
         var startDate = new DateTime(2026, 1, 1);
         var endDate = new DateTime(2026, 1, 2);
 
         var expectedResponse = new List<SensorDataResponse>
         {
-            new SensorDataResponse { PlotId = "plot1" },
-            new SensorDataResponse { PlotId = "plot2" }
+            new SensorDataResponse { PlotId = "plot-001" },
+            new SensorDataResponse { PlotId = "plot-001" }
         };
 
         _serviceMock.Setup(s => s.GetAggregatedDataAsync(
@@ -51,7 +54,7 @@ public class PlotsControllerTests
         
         _serviceMock.Verify(
             s => s.GetAggregatedDataAsync(
-                It.Is<List<string>>(list => list.Contains("plot1") && list.Contains("plot2")),
+                It.Is<List<string>>(list => list.Contains("plot-001") && list.Contains("plot-002")),
                 startDate,
                 endDate,
                 It.IsAny<CancellationToken>()),
@@ -72,7 +75,7 @@ public class PlotsControllerTests
         result.Should().BeOfType<BadRequestObjectResult>();
         
         var badRequest = result as BadRequestObjectResult;
-        badRequest!.Value.Should().Be("plotIds é obrigatório");
+        badRequest!.Value.Should().Be("plotIds é obrigatório. Exemplo: plot-001,plot-002");
         
         _serviceMock.Verify(
             s => s.GetAggregatedDataAsync(
@@ -101,7 +104,7 @@ public class PlotsControllerTests
     public async Task GetSensorData_WithStartDateAfterEndDate_ReturnsBadRequest()
     {
         // Arrange
-        var plotIds = "plot1";
+        var plotIds = "plot-001";
         var startDate = new DateTime(2026, 1, 22);
         var endDate = new DateTime(2026, 1, 1);
 
@@ -112,29 +115,37 @@ public class PlotsControllerTests
         result.Should().BeOfType<BadRequestObjectResult>();
         
         var badRequest = result as BadRequestObjectResult;
-        badRequest!.Value.Should().Be("startDate deve ser anterior a endDate");
+        badRequest!.Value.Should().Be("startDate deve ser anterior ou igual a endDate");
     }
 
     [Fact]
-    public async Task GetSensorData_WithStartDateEqualsEndDate_ReturnsBadRequest()
+    public async Task GetSensorData_WithStartDateEqualsEndDate_ReturnsOkResult()
     {
         // Arrange
-        var plotIds = "plot1";
+        var plotIds = "plot-001";
         var startDate = new DateTime(2026, 1, 1);
         var endDate = new DateTime(2026, 1, 1);
+
+        _serviceMock
+            .Setup(s => s.GetAggregatedDataAsync(
+                It.IsAny<List<string>>(),
+                It.IsAny<DateTime>(),
+                It.IsAny<DateTime>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<SensorDataResponse>());
 
         // Act
         var result = await _controller.GetSensorData(plotIds, startDate, endDate, CancellationToken.None);
 
         // Assert
-        result.Should().BeOfType<BadRequestObjectResult>();
+        result.Should().BeOfType<OkObjectResult>();
     }
 
     [Fact]
     public async Task GetSensorData_WithMultiplePlotIds_ParsesCorrectly()
     {
         // Arrange
-        var plotIds = "plot1,plot2,plot3";
+        var plotIds = "plot-001, plot-002, plot-003";
         var startDate = new DateTime(2026, 1, 1);
         var endDate = new DateTime(2026, 1, 2);
 
@@ -153,9 +164,9 @@ public class PlotsControllerTests
         _serviceMock.Verify(
             s => s.GetAggregatedDataAsync(
                 It.Is<List<string>>(list => list.Count == 3 && 
-                                            list.Contains("plot1") && 
-                                            list.Contains("plot2") && 
-                                            list.Contains("plot3")),
+                                            list.Contains("plot-001") && 
+                                            list.Contains("plot-002") && 
+                                            list.Contains("plot-003")),
                 startDate,
                 endDate,
                 It.IsAny<CancellationToken>()),
@@ -166,7 +177,7 @@ public class PlotsControllerTests
     public async Task GetSensorData_WithPlotIdsContainingSpaces_TrimsSpaces()
     {
         // Arrange
-        var plotIds = " plot1 , plot2 , plot3 ";
+        var plotIds = " plot-001 , plot-002 , plot-003 ";
         var startDate = new DateTime(2026, 1, 1);
         var endDate = new DateTime(2026, 1, 2);
 

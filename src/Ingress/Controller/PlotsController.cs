@@ -47,15 +47,12 @@ public class PlotsController : ControllerBase
         var queryEndDate = endDate.Kind == DateTimeKind.Unspecified
             ? DateTime.SpecifyKind(endDate, DateTimeKind.Utc)
             : endDate.ToUniversalTime();
-
-        // Se endDate é meia-noite (só data, sem hora), avança para o próximo dia
-        // pois o stop do range() do Flux é exclusivo
+        
         if (queryEndDate.TimeOfDay == TimeSpan.Zero)
         {
             queryEndDate = queryEndDate.AddDays(1);
         }
         
-        // Converte a string de plotIds em uma lista
         var plotIdList = plotIds.Split(',', StringSplitOptions.RemoveEmptyEntries)
                                 .Select(id => id.Trim())
                                 .ToList();
