@@ -6,6 +6,6 @@ namespace Sensors.Models
         public double SoilMoisture { get; set; }
         public double Temperature { get; set; }
         public double Precipitation { get; set; }
-        public DateTime Timestamp { get; set; } = DateTime.UtcNow;
+        public DateTime Timestamp { get; set; } = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc);
     }
 }
