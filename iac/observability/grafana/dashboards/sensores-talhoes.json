@@ -6,7 +6,7 @@
   "links": [],
   "panels": [
     {
-      "title": "Umidade do Solo por Talhao (Historico)",
+      "title": "Umidade do solo por talhão (Histórico)",
       "type": "timeseries",
       "gridPos": { "h": 8, "w": 24, "x": 0, "y": 0 },
       "datasource": { "type": "influxdb", "uid": "influxdb" },
@@ -31,13 +31,13 @@
       "targets": [
         {
           "datasource": { "type": "influxdb", "uid": "influxdb" },
-          "query": "from(bucket: \"ingress\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"sensor_data\")\n  |> filter(fn: (r) => r._field == \"soilMoisture\")\n  |> aggregateWindow(every: 1h, fn: mean, createEmpty: false)\n  |> yield(name: \"mean\")",
+          "query": "from(bucket: \"ingress\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"sensor_data\")\n  |> filter(fn: (r) => r._field == \"soilMoisture\")\n  |> aggregateWindow(every: 10m, fn: mean, createEmpty: false)\n  |> map(fn: (r) => ({r with _field: r.plotId}))\n  |> keep(columns: [\"_time\", \"_value\", \"_field\"])\n  |> yield(name: \"mean\")",
           "refId": "A"
         }
       ]
     },
     {
-      "title": "Temperatura por Talhao (Historico)",
+      "title": "Temperatura por talhão (Histórico)",
       "type": "timeseries",
       "gridPos": { "h": 8, "w": 24, "x": 0, "y": 8 },
       "datasource": { "type": "influxdb", "uid": "influxdb" },
@@ -61,13 +61,13 @@
       "targets": [
         {
           "datasource": { "type": "influxdb", "uid": "influxdb" },
-          "query": "from(bucket: \"ingress\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"sensor_data\")\n  |> filter(fn: (r) => r._field == \"temperature\")\n  |> aggregateWindow(every: 1h, fn: mean, createEmpty: false)\n  |> yield(name: \"mean\")",
+          "query": "from(bucket: \"ingress\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"sensor_data\")\n  |> filter(fn: (r) => r._field == \"temperature\")\n  |> aggregateWindow(every: 10m, fn: mean, createEmpty: false)\n  |> map(fn: (r) => ({r with _field: r.plotId}))\n  |> keep(columns: [\"_time\", \"_value\", \"_field\"])\n  |> yield(name: \"mean\")",
           "refId": "A"
         }
       ]
     },
     {
-      "title": "Precipitacao por Talhao (Historico)",
+      "title": "Precipitação por talhão (Histórico)",
       "type": "timeseries",
       "gridPos": { "h": 8, "w": 24, "x": 0, "y": 16 },
       "datasource": { "type": "influxdb", "uid": "influxdb" },
@@ -83,14 +83,14 @@
       "targets": [
         {
           "datasource": { "type": "influxdb", "uid": "influxdb" },
-          "query": "from(bucket: \"ingress\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"sensor_data\")\n  |> filter(fn: (r) => r._field == \"precipitation\")\n  |> aggregateWindow(every: 1h, fn: sum, createEmpty: false)\n  |> yield(name: \"sum\")",
+          "query": "from(bucket: \"ingress\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"sensor_data\")\n  |> filter(fn: (r) => r._field == \"precipitation\")\n  |> aggregateWindow(every: 10m, fn: mean, createEmpty: false)\n  |> map(fn: (r) => ({r with _field: r.plotId}))\n  |> keep(columns: [\"_time\", \"_value\", \"_field\"])\n  |> yield(name: \"mean\")",
           "refId": "A"
         }
       ]
     },
     {
-      "title": "STATUS: Alerta de Seca (Umidade < 30%)",
-      "description": "Mostra a umidade media das ultimas 24h por talhao. Valores abaixo de 30% indicam Alerta de Seca.",
+      "title": "STATUS: Alerta de seca (Umidade < 30%)",
+      "description": "Mostra a umidade média das últimas 24h por talhão. Valores abaixo de 30% indicam alerta de seca.",
       "type": "stat",
       "gridPos": { "h": 6, "w": 8, "x": 0, "y": 24 },
       "datasource": { "type": "influxdb", "uid": "influxdb" },
@@ -110,7 +110,7 @@
           },
           "mappings": [
             { "type": "range", "options": { "from": 0, "to": 30, "result": { "text": "ALERTA DE SECA", "color": "red" } } },
-            { "type": "range", "options": { "from": 30, "to": 50, "result": { "text": "ATENCAO", "color": "yellow" } } },
+            { "type": "range", "options": { "from": 30, "to": 50, "result": { "text": "ATENÇÃO", "color": "yellow" } } },
             { "type": "range", "options": { "from": 50, "to": 100, "result": { "text": "NORMAL", "color": "green" } } }
           ]
         },
@@ -118,8 +118,10 @@
       },
       "options": {
         "graphMode": "area",
-        "textMode": "value_and_name",
-        "colorMode": "background"
+        "textMode": "value",
+        "colorMode": "background",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "text": { "titleSize": 14, "valueSize": 24 }
       },
       "targets": [
         {
@@ -130,8 +132,8 @@
       ]
     },
     {
-      "title": "STATUS: Risco de Praga (Temp > 30 + Umidade > 80%)",
-      "description": "Identifica condicoes favoraveis a pragas: temperatura alta e umidade elevada nas ultimas 24h.",
+      "title": "STATUS: Risco de praga (Temp > 30 + Umidade > 80%)",
+      "description": "Identifica condições favoráveis a pragas: temperatura alta e umidade elevada nas últimas 24h.",
       "type": "stat",
       "gridPos": { "h": 6, "w": 8, "x": 8, "y": 24 },
       "datasource": { "type": "influxdb", "uid": "influxdb" },
@@ -156,8 +158,10 @@
       },
       "options": {
         "graphMode": "area",
-        "textMode": "value_and_name",
-        "colorMode": "background"
+        "textMode": "value",
+        "colorMode": "background",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "text": { "titleSize": 14, "valueSize": 24 }
       },
       "targets": [
         {
@@ -168,8 +172,8 @@
       ]
     },
     {
-      "title": "STATUS GERAL: Ultimo Status por Talhao",
-      "description": "Precipitacao media nas ultimas 24h. Valores acima de 50mm indicam risco de alagamento.",
+      "title": "STATUS GERAL: Último Status por talhão",
+      "description": "Precipitação média nas últimas 24h. Valores acima de 50mm indicam risco de alagamento.",
       "type": "stat",
       "gridPos": { "h": 6, "w": 8, "x": 16, "y": 24 },
       "datasource": { "type": "influxdb", "uid": "influxdb" },
@@ -195,13 +199,15 @@
       },
       "options": {
         "graphMode": "area",
-        "textMode": "value_and_name",
-        "colorMode": "background"
+        "textMode": "value",
+        "colorMode": "background",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "text": { "titleSize": 14, "valueSize": 24 }
       },
       "targets": [
         {
           "datasource": { "type": "influxdb", "uid": "influxdb" },
-          "query": "from(bucket: \"ingress\")\n  |> range(start: -24h)\n  |> filter(fn: (r) => r._measurement == \"sensor_data\")\n  |> filter(fn: (r) => r._field == \"precipitation\")\n  |> group(columns: [\"plotId\"])\n  |> sum()\n  |> group()\n  |> yield(name: \"sum\")",
+          "query": "from(bucket: \"ingress\")\n  |> range(start: -24h)\n  |> filter(fn: (r) => r._measurement == \"sensor_data\")\n  |> filter(fn: (r) => r._field == \"precipitation\")\n  |> group(columns: [\"plotId\"])\n  |> mean()\n  |> group()\n  |> yield(name: \"mean\")",
           "refId": "A"
         }
       ]
@@ -214,9 +220,10 @@
       "fieldConfig": {
         "defaults": {},
         "overrides": [
-          { "matcher": { "id": "byName", "options": "soilMoisture" }, "properties": [{ "id": "unit", "value": "percent" }, { "id": "displayName", "value": "Umidade Solo (%)" }] },
-          { "matcher": { "id": "byName", "options": "temperature" }, "properties": [{ "id": "unit", "value": "celsius" }, { "id": "displayName", "value": "Temperatura (C)" }] },
-          { "matcher": { "id": "byName", "options": "precipitation" }, "properties": [{ "id": "unit", "value": "mm" }, { "id": "displayName", "value": "Precipitacao (mm)" }] },
+          { "matcher": { "id": "byName", "options": "_time" }, "properties": [{ "id": "displayName", "value": "Dia e hora" }, { "id": "unit", "value": "time:DD/MM/YYYY - HH:mm:ss" }] },
+          { "matcher": { "id": "byName", "options": "soilMoisture" }, "properties": [{ "id": "unit", "value": "percent" }, { "id": "displayName", "value": "Umidade solo (%)" }] },
+          { "matcher": { "id": "byName", "options": "temperature" }, "properties": [{ "id": "unit", "value": "celsius" }, { "id": "displayName", "value": "Temperatura (°C)" }] },
+          { "matcher": { "id": "byName", "options": "precipitation" }, "properties": [{ "id": "unit", "value": "mm" }, { "id": "displayName", "value": "Precipitação (mm)" }] },
           { "matcher": { "id": "byName", "options": "plotId" }, "properties": [{ "id": "displayName", "value": "Talhao" }] }
         ]
       },
