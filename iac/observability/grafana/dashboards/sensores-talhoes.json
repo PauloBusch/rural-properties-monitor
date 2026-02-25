@@ -1,0 +1,242 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "title": "Umidade do Solo por Talhao (Historico)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 0 },
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 15, "pointSize": 3 },
+          "color": { "mode": "palette-classic" },
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 30 },
+              { "color": "green", "value": 50 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "influxdb" },
+          "query": "from(bucket: \"ingress\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"sensor_data\")\n  |> filter(fn: (r) => r._field == \"soilMoisture\")\n  |> aggregateWindow(every: 1h, fn: mean, createEmpty: false)\n  |> yield(name: \"mean\")",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "title": "Temperatura por Talhao (Historico)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 8 },
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 10, "pointSize": 3 },
+          "color": { "mode": "palette-classic" },
+          "unit": "celsius",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "blue", "value": null },
+              { "color": "green", "value": 15 },
+              { "color": "orange", "value": 30 },
+              { "color": "red", "value": 38 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "influxdb" },
+          "query": "from(bucket: \"ingress\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"sensor_data\")\n  |> filter(fn: (r) => r._field == \"temperature\")\n  |> aggregateWindow(every: 1h, fn: mean, createEmpty: false)\n  |> yield(name: \"mean\")",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "title": "Precipitacao por Talhao (Historico)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 16 },
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "drawStyle": "bars", "lineWidth": 1, "fillOpacity": 60 },
+          "color": { "mode": "palette-classic" },
+          "unit": "mm",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "influxdb" },
+          "query": "from(bucket: \"ingress\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"sensor_data\")\n  |> filter(fn: (r) => r._field == \"precipitation\")\n  |> aggregateWindow(every: 1h, fn: sum, createEmpty: false)\n  |> yield(name: \"sum\")",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "title": "STATUS: Alerta de Seca (Umidade < 30%)",
+      "description": "Mostra a umidade media das ultimas 24h por talhao. Valores abaixo de 30% indicam Alerta de Seca.",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 24 },
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "orange", "value": 20 },
+              { "color": "yellow", "value": 30 },
+              { "color": "green", "value": 50 }
+            ]
+          },
+          "mappings": [
+            { "type": "range", "options": { "from": 0, "to": 30, "result": { "text": "ALERTA DE SECA", "color": "red" } } },
+            { "type": "range", "options": { "from": 30, "to": 50, "result": { "text": "ATENCAO", "color": "yellow" } } },
+            { "type": "range", "options": { "from": 50, "to": 100, "result": { "text": "NORMAL", "color": "green" } } }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "graphMode": "area",
+        "textMode": "value_and_name",
+        "colorMode": "background"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "influxdb" },
+          "query": "from(bucket: \"ingress\")\n  |> range(start: -24h)\n  |> filter(fn: (r) => r._measurement == \"sensor_data\")\n  |> filter(fn: (r) => r._field == \"soilMoisture\")\n  |> group(columns: [\"plotId\"])\n  |> mean()\n  |> group()\n  |> yield(name: \"mean\")",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "title": "STATUS: Risco de Praga (Temp > 30 + Umidade > 80%)",
+      "description": "Identifica condicoes favoraveis a pragas: temperatura alta e umidade elevada nas ultimas 24h.",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 8, "x": 8, "y": 24 },
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 28 },
+              { "color": "red", "value": 33 }
+            ]
+          },
+          "mappings": [
+            { "type": "range", "options": { "from": 0, "to": 28, "result": { "text": "NORMAL", "color": "green" } } },
+            { "type": "range", "options": { "from": 28, "to": 33, "result": { "text": "ATENCAO", "color": "orange" } } },
+            { "type": "range", "options": { "from": 33, "to": 100, "result": { "text": "RISCO DE PRAGA", "color": "red" } } }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "graphMode": "area",
+        "textMode": "value_and_name",
+        "colorMode": "background"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "influxdb" },
+          "query": "from(bucket: \"ingress\")\n  |> range(start: -24h)\n  |> filter(fn: (r) => r._measurement == \"sensor_data\")\n  |> filter(fn: (r) => r._field == \"temperature\")\n  |> group(columns: [\"plotId\"])\n  |> mean()\n  |> group()\n  |> yield(name: \"mean\")",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "title": "STATUS GERAL: Ultimo Status por Talhao",
+      "description": "Precipitacao media nas ultimas 24h. Valores acima de 50mm indicam risco de alagamento.",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 8, "x": 16, "y": 24 },
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "mm",
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 30 },
+              { "color": "red", "value": 50 }
+            ]
+          },
+          "mappings": [
+            { "type": "range", "options": { "from": 0, "to": 30, "result": { "text": "NORMAL", "color": "green" } } },
+            { "type": "range", "options": { "from": 30, "to": 50, "result": { "text": "CHUVA INTENSA", "color": "yellow" } } },
+            { "type": "range", "options": { "from": 50, "to": 1000, "result": { "text": "RISCO ALAGAMENTO", "color": "red" } } }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "graphMode": "area",
+        "textMode": "value_and_name",
+        "colorMode": "background"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "influxdb" },
+          "query": "from(bucket: \"ingress\")\n  |> range(start: -24h)\n  |> filter(fn: (r) => r._measurement == \"sensor_data\")\n  |> filter(fn: (r) => r._field == \"precipitation\")\n  |> group(columns: [\"plotId\"])\n  |> sum()\n  |> group()\n  |> yield(name: \"sum\")",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "title": "Tabela: Leituras Recentes dos Sensores",
+      "type": "table",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 30 },
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "soilMoisture" }, "properties": [{ "id": "unit", "value": "percent" }, { "id": "displayName", "value": "Umidade Solo (%)" }] },
+          { "matcher": { "id": "byName", "options": "temperature" }, "properties": [{ "id": "unit", "value": "celsius" }, { "id": "displayName", "value": "Temperatura (C)" }] },
+          { "matcher": { "id": "byName", "options": "precipitation" }, "properties": [{ "id": "unit", "value": "mm" }, { "id": "displayName", "value": "Precipitacao (mm)" }] },
+          { "matcher": { "id": "byName", "options": "plotId" }, "properties": [{ "id": "displayName", "value": "Talhao" }] }
+        ]
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "influxdb" },
+          "query": "from(bucket: \"ingress\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r._measurement == \"sensor_data\")\n  |> pivot(rowKey: [\"_time\", \"plotId\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> sort(columns: [\"_time\"], desc: true)\n  |> limit(n: 50)",
+          "refId": "A"
+        }
+      ]
+    }
+  ],
+  "refresh": "10s",
+  "schemaVersion": 39,
+  "tags": ["sensores", "talhoes", "rural", "monitoramento"],
+  "templating": { "list": [] },
+  "time": { "from": "now-24h", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Monitoramento de Sensores - Talhoes",
+  "uid": "sensores-talhoes",
+  "version": 1
+}
