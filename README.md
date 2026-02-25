@@ -301,12 +301,29 @@ Minikube executa clusters Kubernetes localmente, ideal para desenvolvimento e te
 
 ### Organização dos Manifests
 
-Os manifests estão em [`k8s/`](k8s/):
+Os manifests estão organizados em [`k8s/`](k8s/):
 
-- [`k8s/influxdb/`](k8s/influxdb/) — InfluxDB (Deployment, Service, PVC)
-- [`k8s/kafka/`](k8s/kafka/) — Kafka (Deployment, Service)
-- [`k8s/zookeeper/`](k8s/zookeeper/) — Zookeeper (Deployment, Service)
-- [`k8s/ingress/`](k8s/ingress/) — Ingress API (Deployment, Service)
+
+**Infraestrutura:**
+   - [`k8s/infrastructure/redis/`](k8s/infrastructure/redis/) — Redis (Deployment, Service)
+   - [`k8s/infrastructure/grafana/`](k8s/infrastructure/grafana/) — Grafana (Deployment, Service, Secret, ConfigMap)
+   - [`k8s/infrastructure/prometheus/`](k8s/infrastructure/prometheus/) — Prometheus (Deployment, Service, ConfigMap)
+   - [`k8s/infrastructure/influxdb/`](k8s/infrastructure/influxdb/) — InfluxDB (ConfigMap, Deployment, PVC, Secret, Service)
+   - [`k8s/infrastructure/kafka/`](k8s/infrastructure/kafka/) — Kafka (Deployment, Service)
+   - [`k8s/infrastructure/mongodb/`](k8s/infrastructure/mongodb/) — MongoDB (ConfigMap, Deployment, Secret, Service)
+   - [`k8s/infrastructure/zookeeper/`](k8s/infrastructure/zookeeper/) — Zookeeper (Deployment, Service)
+   - [`k8s/infrastructure/keycloak/`](k8s/infrastructure/keycloak/) — Keycloak (Deployment, Service, Secret)
+   - [`k8s/infrastructure/postgres/`](k8s/infrastructure/postgres/) — PostgreSQL (Deployment, Service, Secret)
+
+**Aplicações:**
+   - [`k8s/applications/analytics/`](k8s/applications/analytics/) — Analytics API (Deployment, Service)
+   - [`k8s/applications/ingress/`](k8s/applications/ingress/) — Ingress API (Deployment, Service)
+   - [`k8s/applications/properties/`](k8s/applications/properties/) — Properties API (Deployment, Service)
+   - [`k8s/applications/sensors/`](k8s/applications/sensors/) — Sensors (Deployment, Service)
+
+**Observabilidade:**
+   - [`k8s/observability/grafana/`](k8s/observability/grafana/) — Grafana (Deployment, Service, Secret)
+   - [`k8s/observability/prometheus/`](k8s/observability/prometheus/) — Prometheus (Deployment, Service)
 
 ### Como rodar no Minikube
 

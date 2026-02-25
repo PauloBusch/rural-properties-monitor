@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-config
+  labels:
+    app: grafana
+data:
+  datasource.yml: |
+    apiVersion: 1
+
+    datasources:
+      - name: Prometheus
+        type: prometheus
+        access: proxy
+        url: http://prometheus:9090
+        uid: prometheus
+        isDefault: false
+        editable: true
+
+      - name: InfluxDB
+        type: influxdb
+        access: proxy
+        url: http://influxdb:8086
+        uid: influxdb
+        isDefault: true
+        editable: true
+        jsonData:
+          version: Flux
+          organization: myorg
+          defaultBucket: ingress
+        secureJsonData:
+          token: influxdb-token
+  dashboard.yml: |
+    apiVersion: 1
+
+    providers:
+      - name: "Analytics Dashboards"
+        orgId: 1
+        folder: "Analytics"
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /var/lib/grafana/dashboards
+          foldersFromFilesStructure: false

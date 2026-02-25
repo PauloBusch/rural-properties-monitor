@@ -8,6 +8,10 @@ services:
       - redis
     ports:
       - "5002:8081"
+    environment:
+      - Redis__ConnectionString=redis:6379
+      - Services__IngressApi=http://ingress:8080/api/Health/status
+      - Serilog__MinimumLevel=Information
 
   redis:
     image: redis:7-alpine
