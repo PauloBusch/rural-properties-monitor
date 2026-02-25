@@ -7,7 +7,9 @@ services:
     environment:
       - SensorConfig__Kafka__Broker=kafka:9092
       - SensorConfig__Kafka__Topic=sensor-data
-      - SensorConfig__PlotId=plot-001
+      - SensorConfig__PlotIds__0=plot-001
+      - SensorConfig__PlotIds__1=plot-002
+      - SensorConfig__PlotIds__2=plot-003
       - SensorConfig__TriggerIntervalMs=1000
     depends_on:
       - kafka

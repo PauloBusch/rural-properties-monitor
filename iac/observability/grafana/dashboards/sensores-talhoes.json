@@ -31,7 +31,7 @@
       "targets": [
         {
           "datasource": { "type": "influxdb", "uid": "influxdb" },
-          "query": "from(bucket: \"ingress\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"sensor_data\")\n  |> filter(fn: (r) => r._field == \"soilMoisture\")\n  |> aggregateWindow(every: 10m, fn: mean, createEmpty: false)\n  |> map(fn: (r) => ({r with _field: r.plotId}))\n  |> keep(columns: [\"_time\", \"_value\", \"_field\"])\n  |> yield(name: \"mean\")",
+          "query": "from(bucket: \"ingress\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"sensor_data\")\n  |> filter(fn: (r) => r._field == \"soilMoisture\")\n  |> filter(fn: (r) => r.plotId =~ /^${talhao:regex}$/)\n  |> aggregateWindow(every: 10m, fn: mean, createEmpty: false)\n  |> map(fn: (r) => ({r with _field: r.plotId}))\n  |> keep(columns: [\"_time\", \"_value\", \"_field\"])\n  |> yield(name: \"mean\")",
           "refId": "A"
         }
       ]
@@ -61,7 +61,7 @@
       "targets": [
         {
           "datasource": { "type": "influxdb", "uid": "influxdb" },
-          "query": "from(bucket: \"ingress\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"sensor_data\")\n  |> filter(fn: (r) => r._field == \"temperature\")\n  |> aggregateWindow(every: 10m, fn: mean, createEmpty: false)\n  |> map(fn: (r) => ({r with _field: r.plotId}))\n  |> keep(columns: [\"_time\", \"_value\", \"_field\"])\n  |> yield(name: \"mean\")",
+          "query": "from(bucket: \"ingress\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"sensor_data\")\n  |> filter(fn: (r) => r._field == \"temperature\")\n  |> filter(fn: (r) => r.plotId =~ /^${talhao:regex}$/)\n  |> aggregateWindow(every: 10m, fn: mean, createEmpty: false)\n  |> map(fn: (r) => ({r with _field: r.plotId}))\n  |> keep(columns: [\"_time\", \"_value\", \"_field\"])\n  |> yield(name: \"mean\")",
           "refId": "A"
         }
       ]
@@ -83,7 +83,7 @@
       "targets": [
         {
           "datasource": { "type": "influxdb", "uid": "influxdb" },
-          "query": "from(bucket: \"ingress\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"sensor_data\")\n  |> filter(fn: (r) => r._field == \"precipitation\")\n  |> aggregateWindow(every: 10m, fn: mean, createEmpty: false)\n  |> map(fn: (r) => ({r with _field: r.plotId}))\n  |> keep(columns: [\"_time\", \"_value\", \"_field\"])\n  |> yield(name: \"mean\")",
+          "query": "from(bucket: \"ingress\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"sensor_data\")\n  |> filter(fn: (r) => r._field == \"precipitation\")\n  |> filter(fn: (r) => r.plotId =~ /^${talhao:regex}$/)\n  |> aggregateWindow(every: 10m, fn: mean, createEmpty: false)\n  |> map(fn: (r) => ({r with _field: r.plotId}))\n  |> keep(columns: [\"_time\", \"_value\", \"_field\"])\n  |> yield(name: \"mean\")",
           "refId": "A"
         }
       ]
@@ -126,7 +126,7 @@
       "targets": [
         {
           "datasource": { "type": "influxdb", "uid": "influxdb" },
-          "query": "from(bucket: \"ingress\")\n  |> range(start: -24h)\n  |> filter(fn: (r) => r._measurement == \"sensor_data\")\n  |> filter(fn: (r) => r._field == \"soilMoisture\")\n  |> group(columns: [\"plotId\"])\n  |> mean()\n  |> group()\n  |> yield(name: \"mean\")",
+          "query": "from(bucket: \"ingress\")\n  |> range(start: -24h)\n  |> filter(fn: (r) => r._measurement == \"sensor_data\")\n  |> filter(fn: (r) => r._field == \"soilMoisture\")\n  |> filter(fn: (r) => r.plotId =~ /^${talhao:regex}$/)\n  |> group(columns: [\"plotId\"])\n  |> mean()\n  |> group()\n  |> yield(name: \"mean\")",
           "refId": "A"
         }
       ]
@@ -166,7 +166,7 @@
       "targets": [
         {
           "datasource": { "type": "influxdb", "uid": "influxdb" },
-          "query": "from(bucket: \"ingress\")\n  |> range(start: -24h)\n  |> filter(fn: (r) => r._measurement == \"sensor_data\")\n  |> filter(fn: (r) => r._field == \"temperature\")\n  |> group(columns: [\"plotId\"])\n  |> mean()\n  |> group()\n  |> yield(name: \"mean\")",
+          "query": "from(bucket: \"ingress\")\n  |> range(start: -24h)\n  |> filter(fn: (r) => r._measurement == \"sensor_data\")\n  |> filter(fn: (r) => r._field == \"temperature\")\n  |> filter(fn: (r) => r.plotId =~ /^${talhao:regex}$/)\n  |> group(columns: [\"plotId\"])\n  |> mean()\n  |> group()\n  |> yield(name: \"mean\")",
           "refId": "A"
         }
       ]
@@ -207,13 +207,13 @@
       "targets": [
         {
           "datasource": { "type": "influxdb", "uid": "influxdb" },
-          "query": "from(bucket: \"ingress\")\n  |> range(start: -24h)\n  |> filter(fn: (r) => r._measurement == \"sensor_data\")\n  |> filter(fn: (r) => r._field == \"precipitation\")\n  |> group(columns: [\"plotId\"])\n  |> mean()\n  |> group()\n  |> yield(name: \"mean\")",
+          "query": "from(bucket: \"ingress\")\n  |> range(start: -24h)\n  |> filter(fn: (r) => r._measurement == \"sensor_data\")\n  |> filter(fn: (r) => r._field == \"precipitation\")\n  |> filter(fn: (r) => r.plotId =~ /^${talhao:regex}$/)\n  |> group(columns: [\"plotId\"])\n  |> mean()\n  |> group()\n  |> yield(name: \"mean\")",
           "refId": "A"
         }
       ]
     },
     {
-      "title": "Tabela: Leituras Recentes dos Sensores",
+      "title": "Tabela: Leituras recentes dos sensores",
       "type": "table",
       "gridPos": { "h": 8, "w": 24, "x": 0, "y": 30 },
       "datasource": { "type": "influxdb", "uid": "influxdb" },
@@ -230,8 +230,34 @@
       "targets": [
         {
           "datasource": { "type": "influxdb", "uid": "influxdb" },
-          "query": "from(bucket: \"ingress\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r._measurement == \"sensor_data\")\n  |> pivot(rowKey: [\"_time\", \"plotId\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> sort(columns: [\"_time\"], desc: true)\n  |> limit(n: 50)",
+          "query": "from(bucket: \"ingress\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r._measurement == \"sensor_data\")\n  |> filter(fn: (r) => r.plotId =~ /^${talhao:regex}$/)\n  |> pivot(rowKey: [\"_time\", \"plotId\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> keep(columns: [\"_time\", \"plotId\", \"soilMoisture\", \"temperature\", \"precipitation\"])\n  |> sort(columns: [\"_time\"], desc: true)\n  |> limit(n: 50)",
           "refId": "A"
+        }
+      ],
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false,
+          "countRows": false,
+          "reducer": [],
+          "fields": [],
+          "enablePagination": false
+        },
+        "sortBy": [{ "desc": true, "displayName": "Dia e hora" }]
+      },
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "indexByName": {
+              "plotId": 0,
+              "_time": 1,
+              "soilMoisture": 2,
+              "temperature": 3,
+              "precipitation": 4
+            }
+          }
         }
       ]
     }
@@ -239,7 +265,24 @@
   "refresh": "10s",
   "schemaVersion": 39,
   "tags": ["sensores", "talhoes", "rural", "monitoramento"],
-  "templating": { "list": [] },
+  "templating": {
+    "list": [
+      {
+        "name": "talhao",
+        "label": "Talhão",
+        "type": "query",
+        "datasource": { "type": "influxdb", "uid": "influxdb" },
+        "query": "import \"influxdata/influxdb/schema\"\nschema.tagValues(bucket: \"ingress\", tag: \"plotId\")",
+        "refresh": 2,
+        "multi": true,
+        "includeAll": true,
+        "allValue": ".*",
+        "current": {},
+        "hide": 0,
+        "sort": 1
+      }
+    ]
+  },
   "time": { "from": "now-24h", "to": "now" },
   "timepicker": {},
   "timezone": "browser",

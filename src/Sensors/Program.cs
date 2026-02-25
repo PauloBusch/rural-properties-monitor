@@ -16,9 +16,16 @@ internal class Program
         configRoot.GetSection("SensorConfig").Bind(sensorConfig);
 
         var producer = new SensorDataProducer(sensorConfig.Kafka.Broker, sensorConfig.Kafka.Topic);
-        var emulator = new SensorEmulator(producer, sensorConfig.PlotId, sensorConfig.TriggerIntervalMs);
 
-        Console.WriteLine($"Starting sensor emulator for plot '{sensorConfig.PlotId}' to Kafka broker '{sensorConfig.Kafka.Broker}', topic '{sensorConfig.Kafka.Topic}', interval '{sensorConfig.TriggerIntervalMs}' ms");
+        await Task.WhenAll(
+            sensorConfig.PlotIds.Select(plotId => RunEmulatorAsync(producer, sensorConfig, plotId))
+        );
+    }
+
+    private static async Task RunEmulatorAsync(SensorDataProducer producer, SensorConfig sensorConfig, string plotId)
+    {
+        var emulator = new SensorEmulator(producer, plotId, sensorConfig.TriggerIntervalMs);
+        Console.WriteLine($"Starting sensor emulator for plot '{plotId}' to Kafka broker '{sensorConfig.Kafka.Broker}', topic '{sensorConfig.Kafka.Topic}', interval '{sensorConfig.TriggerIntervalMs}' ms");
         await emulator.RunAsync();
     }
 }

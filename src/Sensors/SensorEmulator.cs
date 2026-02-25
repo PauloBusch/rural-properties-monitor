@@ -30,7 +30,7 @@ namespace Sensors
                     SoilMoisture = Math.Round(_random.NextDouble() * 100, 2),
                     Temperature = Math.Round(_random.NextDouble() * 40 - 10, 2),
                     Precipitation = Math.Round(_random.NextDouble() * 20, 2),
-                    Timestamp = DateTime.UtcNow
+                    Timestamp = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc)
                 };
                 await _producer.ProduceAsync(data);
                 Console.WriteLine($"Sent: {System.Text.Json.JsonSerializer.Serialize(data)}");
