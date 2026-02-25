@@ -39,7 +39,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Analytics", "Analytics", "{
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Properties.Tests", "tests\Properties.Tests\Properties.Tests.csproj", "{D887126A-07F7-42AA-BD1E-5302A193B631}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Analytics.IntegrationTests", "Analytics.IntegrationTests\Analytics.IntegrationTests.csproj", "{F6CA41D9-8D87-4E8D-B570-4499A77AE15B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Analytics.IntegrationTests", "tests\Analytics.IntegrationTests\Analytics.IntegrationTests.csproj", "{F6CA41D9-8D87-4E8D-B570-4499A77AE15B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
