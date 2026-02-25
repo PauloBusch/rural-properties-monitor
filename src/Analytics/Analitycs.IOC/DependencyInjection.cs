@@ -1,5 +1,6 @@
 ﻿using Analitycs.Data.Clients;
 using Analitycs.Domain.Interfaces;
+using Analytics.Application.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Http.Resilience;
@@ -30,6 +31,8 @@ public static class DependencyInjection
                     BreakDuration = TimeSpan.FromSeconds(30)
                 });
             });
+
+        services.AddScoped<IAnalyticsService, AnalyticsService>();
 
         return services;
     }

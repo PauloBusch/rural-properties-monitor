@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Prometheus;
 using Serilog;
+using Analitycs.IOC;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -38,6 +39,8 @@ builder.Services.AddHealthChecks()
         redisConnection,
         name: "redis",
         failureStatus: HealthStatus.Unhealthy);
+
+builder.Services.AddInfrastructure(builder.Configuration);
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
@@ -74,3 +77,5 @@ app.MapMetrics();
 app.MapControllers();
 
 app.Run();
+
+public partial class Program { }
