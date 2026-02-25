@@ -5,34 +5,38 @@ using Properties.Settings;
 
 namespace Properties.Services;
 
-public class PropertyService
+public class PropertyService : IPropertyService
 {
     private readonly IMongoCollection<Property> _properties;
 
-    public PropertyService(IOptions<MongoDbSettings> mongoSettings)
+    public PropertyService(IMongoDatabase database)
     {
-        var mongoClient = new MongoClient(mongoSettings.Value.ConnectionString);
-        var mongoDatabase = mongoClient.GetDatabase(mongoSettings.Value.DatabaseName);
-        _properties = mongoDatabase.GetCollection<Property>("Properties");
+        _properties = database.GetCollection<Property>("Properties");
     }
 
-    // Listar todas as propriedades de um produtor específico
-    public async Task<List<Property>> GetAsync(string producerId) =>
-        await _properties.Find(x => x.ProducerId == producerId).ToListAsync();
-
-    // Obter uma propriedade específica por ID
     public async Task<Property?> GetByIdAsync(string id) =>
         await _properties.Find(x => x.Id == id).FirstOrDefaultAsync();
 
-    // Criar nova propriedade
     public async Task CreateAsync(Property newProperty) =>
         await _properties.InsertOneAsync(newProperty);
 
-    // Adicionar um talhão a uma propriedade existente (Requisito Funcional)
     public async Task AddPlotAsync(string propertyId, Plot plot)
     {
-        var filter = Builders<Property>.Filter.Eq(x => x.Id, propertyId);
-        var update = Builders<Property>.Update.Push(x => x.Plots, plot);
+        if (plot.AreaHectares <= 0)
+            throw new ArgumentException("The area of ​​the plot must be greater than zero");
+
+        var filter = Builders<Property>.Filter.Eq(p => p.Id, propertyId);
+        var update = Builders<Property>.Update.Push(p => p.Plots, plot);
         await _properties.UpdateOneAsync(filter, update);
+    }
+
+    public Task<IEnumerable<Property>> GetAllAsync()
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<IEnumerable<Property>> GetByProducerAsync(string producerId)
+    {
+        throw new NotImplementedException();
     }
 }

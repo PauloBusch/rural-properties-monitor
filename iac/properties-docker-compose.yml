@@ -10,10 +10,15 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - MongoDbSettings__ConnectionString=mongodb://admin:adminpassmongo@mongodb-db:27017
       - MongoDbSettings__DatabaseName=properties_db
+      - Keycloak__Authority=http://keycloak:8080/realms/RuralTech
+      - Keycloak__Audience=ruraltech-services
+      - Keycloak__ClientSecret=${KEYCLOAK_CLIENT_SECRET}
+      - Keycloak__RequireHttpsMetadata=false
     ports:
       - "8081:8080" 
     depends_on:
       - mongodb-db
+      - keycloak
 
   mongodb-db:
     image: mongo:latest
