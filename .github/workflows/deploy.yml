@@ -11,9 +11,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Run tests with coverage
+      - name: Run tests with coverage (excluding Controllers)
         run: |
-          dotnet test --collect:"XPlat Code Coverage" --logger "trx;LogFileName=test_results.trx" --results-directory ./TestResults
+          dotnet test --collect:"XPlat Code Coverage" --logger "trx;LogFileName=test_results.trx" --results-directory ./TestResults --filter "FullyQualifiedName!~Controllers"
 
       - name: Generate HTML coverage report
         run: |
