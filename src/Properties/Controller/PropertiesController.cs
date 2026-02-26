@@ -55,6 +55,7 @@ public class PropertiesController : ControllerBase
             ProducerId = p.ProducerId,
             Plots = p.Plots?.Select(plot => new PlotResponseDto
             {
+                IdPlot = plot.Id,
                 Name = plot.Name,
                 AreaHectares = plot.AreaHectares,
                 CropType = plot.CropType
@@ -72,6 +73,7 @@ public class PropertiesController : ControllerBase
 
         var plot = new Plot
         {
+            Id = MongoDB.Bson.ObjectId.GenerateNewId().ToString(),
             Name = dto.Name,
             CropType = dto.CropType,
             AreaHectares = dto.AreaHectares
