@@ -34,20 +34,25 @@ public class AnalyticsService : IAnalyticsService
         DateTime end,
         CancellationToken cancellationToken)
     {
-        var cacheKey = GenerateCacheKey(plotIds, start, end);
+        
+        # region cache key generation checking
+        
+            var cacheKey = GenerateCacheKey(plotIds, start, end);
 
-        _logger.LogInformation("Checking cache for key {CacheKey}", cacheKey);
+            _logger.LogInformation("Checking cache for key {CacheKey}", cacheKey);
 
-        var cachedData = await _cache.GetStringAsync(cacheKey, cancellationToken);
+            var cachedData = await _cache.GetStringAsync(cacheKey, cancellationToken);
 
-        if (!string.IsNullOrEmpty(cachedData))
-        {
-            _logger.LogInformation("Cache hit for key {CacheKey}", cacheKey);
-            return JsonSerializer.Deserialize<List<SensorData>>(cachedData)!;
-        }
+            if (!string.IsNullOrEmpty(cachedData))
+            {
+                _logger.LogInformation("Cache hit for key {CacheKey}", cacheKey);
+                return JsonSerializer.Deserialize<List<SensorData>>(cachedData)!;
+            }
 
-        _logger.LogInformation("Cache miss for key {CacheKey}. Calling IngressApi", cacheKey);
-
+            _logger.LogInformation("Cache miss for key {CacheKey}. Calling IngressApi", cacheKey);
+        
+        #endregion
+        
         var data = await _ingressApiClient.GetSensorDataAsync(
             plotIds,
             start,

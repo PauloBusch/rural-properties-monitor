@@ -4,7 +4,6 @@ namespace Properties.Services;
 
 public interface IPropertyService
 {
-    Task<IEnumerable<Property>> GetAllAsync();
     Task<Property?> GetByIdAsync(string id);
     Task<IEnumerable<Property>> GetByProducerAsync(string producerId);
     Task CreateAsync(Property property);

@@ -6,7 +6,7 @@ using Properties.Services;
 
 namespace Properties.Controller;
 
-[Authorize]
+//[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class PropertiesController : ControllerBase
@@ -18,7 +18,6 @@ public class PropertiesController : ControllerBase
         _propertyService = propertyService;
     }
 
-    /// register a new property for the producer
     [HttpPost]
     public async Task<ActionResult<PropertyResponseDto>> Create(PropertyCreateDto dto)
     {
@@ -26,7 +25,8 @@ public class PropertiesController : ControllerBase
         {
             Name = dto.Name,
             Location = dto.Location,
-            ProducerId = dto.ProducerId
+            ProducerId = dto.ProducerId,
+            Plots = new List<Plot>() 
         };
 
         await _propertyService.CreateAsync(property);
@@ -42,8 +42,6 @@ public class PropertiesController : ControllerBase
         return CreatedAtAction(nameof(GetByProducer), new { producerId = response.ProducerId }, response);
     }
 
-
-    /// view all properties and plots of land belonging to a producer
     [HttpGet("producer/{producerId}")]
     public async Task<ActionResult<IEnumerable<PropertyResponseDto>>> GetByProducer(string producerId)
     {
@@ -51,19 +49,21 @@ public class PropertiesController : ControllerBase
 
         var response = properties.Select(p => new PropertyResponseDto
         {
-            Id = p.Id,
+            Id = p.Id!,
             Name = p.Name,
-            Plots = p.Plots.Select(plot => new PlotResponseDto
+            Location = p.Location,
+            ProducerId = p.ProducerId,
+            Plots = p.Plots?.Select(plot => new PlotResponseDto
             {
                 Name = plot.Name,
-                AreaHectares = plot.AreaHectares
-            }).ToList()
+                AreaHectares = plot.AreaHectares,
+                CropType = plot.CropType
+            }).ToList() ?? new List<PlotResponseDto>()
         });
 
         return Ok(response);
     }
 
-    ///register a new plot within an existing property
     [HttpPost("{propertyId}/plots")]
     public async Task<IActionResult> AddPlot(string propertyId, PlotCreateDto dto)
     {
@@ -78,6 +78,6 @@ public class PropertiesController : ControllerBase
         };
 
         await _propertyService.AddPlotAsync(propertyId, plot);
-        return NoContent();
+        return Ok(new { message = "Talhão adicionado com sucesso." });
     }
 }

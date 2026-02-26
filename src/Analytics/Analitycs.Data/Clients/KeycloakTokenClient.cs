@@ -23,6 +23,17 @@ public class KeycloakTokenClient : IKeycloakTokenService
         _httpClient = httpClient;
         _settings = settings.Value;
         _logger = logger;
+
+        // Fallback: read client secret from environment variable when not bound via configuration
+        if (string.IsNullOrWhiteSpace(_settings.ClientSecret))
+        {
+            var envSecret = Environment.GetEnvironmentVariable("KEYCLOAK_CLIENT_SECRET");
+            if (!string.IsNullOrWhiteSpace(envSecret))
+            {
+                _settings.ClientSecret = envSecret;
+                _logger.LogDebug("Keycloak ClientSecret loaded from environment variable KEYCLOAK_CLIENT_SECRET");
+            }
+        }
     }
 
     public async Task<string> GetAccessTokenAsync(CancellationToken cancellationToken)

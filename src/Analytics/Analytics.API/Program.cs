@@ -8,6 +8,30 @@ using Analitycs.IOC;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Load .env file from iac/ directory when running outside Docker (Development)
+if (builder.Environment.IsDevelopment())
+{
+    var envFile = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "iac", ".env"));
+    if (File.Exists(envFile))
+    {
+        foreach (var line in File.ReadAllLines(envFile))
+        {
+            var trimmed = line.Trim();
+            if (string.IsNullOrEmpty(trimmed) || trimmed.StartsWith('#'))
+                continue;
+
+            var idx = trimmed.IndexOf('=');
+            if (idx < 0) continue;
+
+            var key = trimmed[..idx].Trim();
+            var value = trimmed[(idx + 1)..].Trim();
+
+            if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable(key)))
+                Environment.SetEnvironmentVariable(key, value);
+        }
+    }
+}
+
 builder.Host.UseSerilog((context, services, configuration) =>
 {
     configuration
