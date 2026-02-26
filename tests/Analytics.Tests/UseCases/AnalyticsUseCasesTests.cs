@@ -33,6 +33,7 @@ public class AnalyticsServiceTests : UseCaseTestBase<AnalyticsService>
         var bytes = Encoding.UTF8.GetBytes(serialized);
 
         var ingressApiClient = Substitute.For<IIngressApiClient>();
+        var propertiesApiClient = Substitute.For<IPropertiesApiClient>();
         var cache = Substitute.For<IDistributedCache>();
         var logger = Substitute.For<ILogger<AnalyticsService>>();
 
@@ -43,6 +44,7 @@ public class AnalyticsServiceTests : UseCaseTestBase<AnalyticsService>
 
         var service = new AnalyticsService(
             ingressApiClient,
+            propertiesApiClient,
             cache,
             logger);
 
