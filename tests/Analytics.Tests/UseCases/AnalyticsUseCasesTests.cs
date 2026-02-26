@@ -50,7 +50,6 @@ public class AnalyticsServiceTests : UseCaseTestBase<AnalyticsService>
             factory.PlotIds,
             factory.StartDate,
             factory.EndDate,
-            factory.Token,
             CancellationToken.None);
 
         result.ShouldNotBeNull();
@@ -73,7 +72,6 @@ public class AnalyticsServiceTests : UseCaseTestBase<AnalyticsService>
                 Arg.Any<List<string>>(),
                 Arg.Any<DateTime>(),
                 Arg.Any<DateTime>(),
-                Arg.Any<string>(),
                 Arg.Any<CancellationToken>())
             .Returns(expectedData);
 
@@ -81,7 +79,6 @@ public class AnalyticsServiceTests : UseCaseTestBase<AnalyticsService>
             factory.PlotIds,
             factory.StartDate,
             factory.EndDate,
-            factory.Token,
             CancellationToken);
 
         result.ShouldNotBeNull();
@@ -92,7 +89,6 @@ public class AnalyticsServiceTests : UseCaseTestBase<AnalyticsService>
                 Arg.Any<List<string>>(),
                 Arg.Any<DateTime>(),
                 Arg.Any<DateTime>(),
-                factory.Token,
                 Arg.Any<CancellationToken>());
 
         await _cache.Received(1)

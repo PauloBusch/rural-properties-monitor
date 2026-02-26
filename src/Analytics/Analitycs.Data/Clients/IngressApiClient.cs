@@ -1,29 +1,31 @@
 ﻿using Analitycs.Domain.Entity;
 using Analitycs.Domain.Interfaces;
-using System;
-using System.Collections.Generic;
 using System.Net.Http.Headers;
-using System.Text;
 using System.Text.Json;
 
 namespace Analitycs.Data.Clients;
+
 public class IngressApiClient : IIngressApiClient
 {
     private readonly HttpClient _httpClient;
+    private readonly IKeycloakTokenService _keycloakTokenService;
 
-    public IngressApiClient(HttpClient httpClient)
+    public IngressApiClient(HttpClient httpClient, IKeycloakTokenService keycloakTokenService)
     {
         _httpClient = httpClient;
+        _keycloakTokenService = keycloakTokenService;
     }
 
     public async Task<List<SensorData>> GetSensorDataAsync(
         List<string> plotIds, DateTime startDate,
-        DateTime endDate, string token, CancellationToken cancellationToken)
+        DateTime endDate, CancellationToken cancellationToken)
     {
         if (plotIds == null || !plotIds.Any())
             throw new ArgumentException("plotIds cannot be empty");
 
-        var query = $"https://localhost:44396/api/plots/sensor-data?" +
+        var accessToken = await _keycloakTokenService.GetAccessTokenAsync(cancellationToken);
+
+        var query = $"plots/sensor-data?" +
                     $"plotIds={string.Join(",", plotIds)}" +
                     $"&startDate={startDate:O}" +
                     $"&endDate={endDate:O}";
@@ -31,7 +33,7 @@ public class IngressApiClient : IIngressApiClient
         using var request = new HttpRequestMessage(HttpMethod.Get, query);
 
         request.Headers.Authorization =
-            new AuthenticationHeaderValue("Bearer", token);
+            new AuthenticationHeaderValue("Bearer", accessToken);
 
         using var response = await _httpClient.SendAsync(request, cancellationToken);
 

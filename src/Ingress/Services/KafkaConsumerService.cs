@@ -68,7 +68,6 @@ namespace IngressApi.Services
                 }
                 catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
                 {
-                    // Shutdown gracioso — não logar como erro
                     break;
                 }
                 catch (Exception ex)

@@ -6,6 +6,8 @@ services:
       context: ../src/Properties
       dockerfile: Dockerfile
     container_name: properties-service
+    env_file:
+      - .env
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - MongoDbSettings__ConnectionString=mongodb://admin:adminpassmongo@mongodb-db:27017

@@ -32,7 +32,6 @@ public class AnalyticsService : IAnalyticsService
         List<string> plotIds,
         DateTime start,
         DateTime end,
-        string token,
         CancellationToken cancellationToken)
     {
         var cacheKey = GenerateCacheKey(plotIds, start, end);
@@ -53,7 +52,6 @@ public class AnalyticsService : IAnalyticsService
             plotIds,
             start,
             end,
-            token,
             cancellationToken);
 
         var serialized = JsonSerializer.Serialize(data);

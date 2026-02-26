@@ -53,7 +53,6 @@ public class AnalyticsController : ControllerBase
             plotIds,
             startDate,
             endDate,
-            token,
             cancellationToken);
 
         _logger.LogInformation("Sensor data successfully retrieved");
