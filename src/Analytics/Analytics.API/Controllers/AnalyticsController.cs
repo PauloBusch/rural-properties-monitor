@@ -48,15 +48,10 @@ public class AnalyticsController : ControllerBase
         }
             
 
-        var token = HttpContext.Request.Headers["Authorization"]
-            .ToString()
-            .Replace("Bearer ", "");
-
         var result = await _analyticsService.GetAnalyticsAsync(
             plotIds,
             startDate,
             endDate,
-            token,
             cancellationToken);
 
         _logger.LogInformation("Sensor data successfully retrieved");

@@ -4,6 +4,8 @@ services:
       context: ../src/Ingress
       dockerfile: Dockerfile
     container_name: ingress
+    env_file:
+      - .env
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - Kafka__Broker=kafka:9092

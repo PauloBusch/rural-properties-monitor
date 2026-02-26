@@ -1,5 +1,6 @@
 ﻿using Analitycs.Data.Clients;
 using Analitycs.Domain.Interfaces;
+using Analitycs.Domain.Settings;
 using Analytics.Application.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,7 +15,18 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        services.AddHttpClient<IIngressApiClient, IngressApiClient>()
+        services.Configure<KeycloakSettings>(
+            configuration.GetSection("Keycloak"));
+
+        services.AddHttpClient<IKeycloakTokenService, KeycloakTokenClient>();
+
+        var ingressBaseUrl = configuration["Services:IngressApi"]
+            ?? throw new InvalidOperationException("IngressApi URL not configured");
+
+        services.AddHttpClient<IIngressApiClient, IngressApiClient>(client =>
+            {
+                client.BaseAddress = new Uri(ingressBaseUrl);
+            })
             .AddResilienceHandler("ingress-pipeline", builder =>
             {
                 builder.AddRetry(new HttpRetryStrategyOptions

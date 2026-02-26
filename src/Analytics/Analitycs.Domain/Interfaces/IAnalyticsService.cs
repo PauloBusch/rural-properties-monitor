@@ -7,6 +7,5 @@ public interface IAnalyticsService
             List<string> plotIds,
             DateTime start,
             DateTime end,
-            string token,
             CancellationToken cancellationToken);
 }

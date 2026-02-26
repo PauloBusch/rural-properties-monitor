@@ -7,7 +7,6 @@ public interface IIngressApiClient
         List<string> plotIds,
         DateTime startDate,
         DateTime endDate,
-        string token,
         CancellationToken cancellationToken
     );
 }
