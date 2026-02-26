@@ -30,6 +30,10 @@ public class PlotsControllerTests
         var startDate = new DateTime(2026, 1, 1);
         var endDate = new DateTime(2026, 1, 2);
 
+        // Controller normalizes to UTC; endDate midnight gets AddDays(1)
+        var expectedStartDate = DateTime.SpecifyKind(startDate, DateTimeKind.Utc);
+        var expectedEndDate = DateTime.SpecifyKind(endDate, DateTimeKind.Utc).AddDays(1);
+
         var expectedResponse = new List<SensorDataResponse>
         {
             new SensorDataResponse { PlotId = "plot-001" },
@@ -38,8 +42,8 @@ public class PlotsControllerTests
 
         _serviceMock.Setup(s => s.GetAggregatedDataAsync(
                 It.IsAny<List<string>>(),
-                startDate,
-                endDate,
+                expectedStartDate,
+                expectedEndDate,
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResponse);
 
@@ -55,8 +59,8 @@ public class PlotsControllerTests
         _serviceMock.Verify(
             s => s.GetAggregatedDataAsync(
                 It.Is<List<string>>(list => list.Contains("plot-001") && list.Contains("plot-002")),
-                startDate,
-                endDate,
+                expectedStartDate,
+                expectedEndDate,
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }
@@ -149,11 +153,15 @@ public class PlotsControllerTests
         var startDate = new DateTime(2026, 1, 1);
         var endDate = new DateTime(2026, 1, 2);
 
+        // Controller normalizes to UTC; endDate midnight gets AddDays(1)
+        var expectedStartDate = DateTime.SpecifyKind(startDate, DateTimeKind.Utc);
+        var expectedEndDate = DateTime.SpecifyKind(endDate, DateTimeKind.Utc).AddDays(1);
+
         _serviceMock
             .Setup(s => s.GetAggregatedDataAsync(
                 It.IsAny<List<string>>(),
-                startDate,
-                endDate,
+                expectedStartDate,
+                expectedEndDate,
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<SensorDataResponse>());
 
@@ -167,8 +175,8 @@ public class PlotsControllerTests
                                             list.Contains("plot-001") && 
                                             list.Contains("plot-002") && 
                                             list.Contains("plot-003")),
-                startDate,
-                endDate,
+                expectedStartDate,
+                expectedEndDate,
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }
@@ -181,11 +189,15 @@ public class PlotsControllerTests
         var startDate = new DateTime(2026, 1, 1);
         var endDate = new DateTime(2026, 1, 2);
 
+        // Controller normalizes to UTC; endDate midnight gets AddDays(1)
+        var expectedStartDate = DateTime.SpecifyKind(startDate, DateTimeKind.Utc);
+        var expectedEndDate = DateTime.SpecifyKind(endDate, DateTimeKind.Utc).AddDays(1);
+
         _serviceMock
             .Setup(s => s.GetAggregatedDataAsync(
                 It.IsAny<List<string>>(),
-                startDate,
-                endDate,
+                expectedStartDate,
+                expectedEndDate,
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<SensorDataResponse>());
 
@@ -197,8 +209,8 @@ public class PlotsControllerTests
             s => s.GetAggregatedDataAsync(
                 It.Is<List<string>>(list => 
                     list.All(id => !id.StartsWith(" ") && !id.EndsWith(" "))),
-                startDate,
-                endDate,
+                expectedStartDate,
+                expectedEndDate,
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }
