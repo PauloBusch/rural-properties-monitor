@@ -25,13 +25,15 @@ builder.Services.AddStackExchangeRedisCache(options =>
 var ingressUrl = builder.Configuration["Services:IngressApi"]
     ?? throw new InvalidOperationException("IngressApi URL not configured");
 
+var ingressHealthUrl = ingressUrl.TrimEnd('/') + "/Health/status";
+
 var redisConnection = builder.Configuration["Redis:ConnectionString"]
     ?? throw new InvalidOperationException("Redis connection not configured");
 
 builder.Services.AddHealthChecks()
     .AddCheck("self", () => HealthCheckResult.Healthy())
     .AddUrlGroup(
-        new Uri(ingressUrl),
+        new Uri(ingressHealthUrl),
         name: "IngressApi",
         failureStatus: HealthStatus.Unhealthy,
         timeout: TimeSpan.FromSeconds(5))
@@ -59,7 +61,10 @@ if (app.Environment.IsDevelopment())
 app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseMiddleware<CorrelationIdMiddleware>();
 
-app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseHttpMetrics();
 

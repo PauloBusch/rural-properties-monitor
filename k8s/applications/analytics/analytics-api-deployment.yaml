@@ -19,11 +19,22 @@ spec:
           image: rural-properties-monitor-analytics:latest
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 8081
+            - containerPort: 8080
           env:
             - name: Redis__ConnectionString
               value: "redis:6379"
             - name: Services__IngressApi
-              value: "http://ingress:8080/api/Health/status"
+              value: "http://ingress:8080/api/"
+            - name: Keycloak__TokenUrl
+              value: "http://keycloak:8080/realms/RuralTech/protocol/openid-connect/token"
+            - name: Keycloak__ClientId
+              value: "ruraltech-services"
+            - name: Keycloak__ClientSecret
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-secret
+                  key: client-secret
+            - name: Keycloak__GrantType
+              value: "client_credentials"
             - name: Serilog__MinimumLevel
               value: "Information"
