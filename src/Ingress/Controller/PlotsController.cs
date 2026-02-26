@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace IngressApi.Controller;
 
-//[Authorize]
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class PlotsController : ControllerBase
