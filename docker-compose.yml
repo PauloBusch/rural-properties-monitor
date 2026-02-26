@@ -6,3 +6,4 @@ include:
   - ./iac/ingress-docker-compose.yml
   - ./iac/properties-docker-compose.yml
   - ./iac/sensors-docker-compose.yml
+  - ./iac/observability-docker-compose.yml
