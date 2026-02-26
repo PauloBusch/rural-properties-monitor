@@ -1,4 +1,5 @@
-﻿using Analitycs.Domain.Interfaces;
+﻿using Analitycs.Application.Interfaces;
+using Analitycs.Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Analytics.API.Controllers;
@@ -9,12 +10,15 @@ namespace Analytics.API.Controllers;
 public class AnalyticsController : ControllerBase
 {
     private readonly IAnalyticsService _analyticsService;
+    private readonly IDashboardService _dashboardService;
     private readonly ILogger<AnalyticsController> _logger;
 
-    public AnalyticsController(IAnalyticsService analyticsService, ILogger<AnalyticsController> logger)
+    public AnalyticsController(IAnalyticsService analyticsService, ILogger<AnalyticsController> logger, IDashboardService dashboardService)
     {
         _analyticsService = analyticsService;
         _logger = logger;
+        _dashboardService = dashboardService;
+
     }
 
     /// <summary>
@@ -43,7 +47,7 @@ public class AnalyticsController : ControllerBase
         {
             _logger.LogWarning("Invalid request: startDate >= endDate");
             return BadRequest("startDate must be earlier than endDate");
-        }
+        }        
 
         var token = HttpContext.Request.Headers["Authorization"]
             .ToString()
@@ -86,6 +90,47 @@ public class AnalyticsController : ControllerBase
             cancellationToken);
 
         _logger.LogInformation("Properties successfully retrieved for producer {ProducerId}", producerId);
+
+        return Ok(result);
+    }
+
+    [HttpGet("dashboard/{producerId}")]
+    public async Task<IActionResult> GetDashboard(
+        string producerId,
+        [FromQuery] DateTime startDate,
+        [FromQuery] DateTime endDate,
+        CancellationToken cancellationToken)
+    {
+        _logger.LogInformation(
+            "Dashboard request received for Producer {ProducerId}",
+            producerId);
+
+        if (string.IsNullOrWhiteSpace(producerId))
+        {
+            _logger.LogWarning("Invalid request: producerId is empty");
+            return BadRequest("producerId is required");
+        }
+
+        if (startDate >= endDate)
+        {
+            _logger.LogWarning("Invalid request: startDate >= endDate");
+            return BadRequest("startDate must be earlier than endDate");
+        }
+
+        var token = HttpContext.Request.Headers["Authorization"]
+            .ToString()
+            .Replace("Bearer ", "");
+
+        var result = await _dashboardService.GetDashboardAsync(
+            producerId,
+            token,
+            startDate,
+            endDate,
+            cancellationToken);
+
+        _logger.LogInformation(
+            "Dashboard successfully generated for Producer {ProducerId}",
+            producerId);
 
         return Ok(result);
     }

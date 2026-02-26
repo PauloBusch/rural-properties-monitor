@@ -1,4 +1,5 @@
-﻿using Analitycs.Data.Clients;
+﻿using Analitycs.Application.Interfaces;
+using Analitycs.Data.Clients;
 using Analitycs.Domain.Interfaces;
 using Analitycs.Domain.Settings;
 using Analytics.Application.Services;
@@ -63,6 +64,7 @@ public static class DependencyInjection
             });
 
         // Service principal
+        services.AddScoped<IDashboardService, DashboardService>();
         services.AddScoped<IAnalyticsService, AnalyticsService>();
 
         return services;
