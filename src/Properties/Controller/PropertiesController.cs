@@ -6,7 +6,7 @@ using Properties.Services;
 
 namespace Properties.Controller;
 
-//[Authorize]
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class PropertiesController : ControllerBase
