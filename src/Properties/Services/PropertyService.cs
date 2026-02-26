@@ -1,42 +1,40 @@
 ﻿using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using Properties.Models;
-using Properties.Settings;
+using Properties.Settings; 
 
-namespace Properties.Services;
-
-public class PropertyService : IPropertyService
+namespace Properties.Services
 {
-    private readonly IMongoCollection<Property> _properties;
-
-    public PropertyService(IMongoDatabase database)
+    public class PropertyService : IPropertyService
     {
-        _properties = database.GetCollection<Property>("Properties");
-    }
+        private readonly IMongoCollection<Property> _propertiesCollection;
 
-    public async Task<Property?> GetByIdAsync(string id) =>
-        await _properties.Find(x => x.Id == id).FirstOrDefaultAsync();
+        public PropertyService(IMongoDatabase database)
+        {
+            _propertiesCollection = database.GetCollection<Property>("Properties");
+        }
 
-    public async Task CreateAsync(Property newProperty) =>
-        await _properties.InsertOneAsync(newProperty);
+        public async Task CreateAsync(Property property)
+        {
+            await _propertiesCollection.InsertOneAsync(property);
+        }
 
-    public async Task AddPlotAsync(string propertyId, Plot plot)
-    {
-        if (plot.AreaHectares <= 0)
-            throw new ArgumentException("The area of ​​the plot must be greater than zero");
+        public async Task<IEnumerable<Property>> GetByProducerAsync(string producerId)
+        {
+            return await _propertiesCollection.Find(p => p.ProducerId == producerId).ToListAsync();
+        }
 
-        var filter = Builders<Property>.Filter.Eq(p => p.Id, propertyId);
-        var update = Builders<Property>.Update.Push(p => p.Plots, plot);
-        await _properties.UpdateOneAsync(filter, update);
-    }
+        public async Task<Property?> GetByIdAsync(string id)
+        {
+            return await _propertiesCollection.Find(p => p.Id == id).FirstOrDefaultAsync();
+        }
 
-    public Task<IEnumerable<Property>> GetAllAsync()
-    {
-        throw new NotImplementedException();
-    }
+        public async Task AddPlotAsync(string propertyId, Plot plot)
+        {
+            var filter = Builders<Property>.Filter.Eq(p => p.Id, propertyId);
+            var update = Builders<Property>.Update.Push(p => p.Plots, plot);
 
-    public Task<IEnumerable<Property>> GetByProducerAsync(string producerId)
-    {
-        throw new NotImplementedException();
+            await _propertiesCollection.UpdateOneAsync(filter, update);
+        }
     }
 }

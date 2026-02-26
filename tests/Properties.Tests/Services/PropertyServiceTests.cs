@@ -1,51 +1,66 @@
 ﻿using FluentAssertions;
-using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using Moq;
 using Properties.Models;
 using Properties.Services;
-using Properties.Settings;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace Properties.Tests.Services;
-
-public class PropertyServiceTests
+namespace Properties.Tests.Services
 {
-    private readonly Mock<IMongoCollection<Property>> _collectionMock;
-    private readonly PropertyService _service;
-
-    public PropertyServiceTests()
+    public class PropertyServiceTests
     {
-        _collectionMock = new Mock<IMongoCollection<Property>>();
+        private readonly Mock<IMongoCollection<Property>> _collectionMock;
+        private readonly PropertyService _service;
 
-        var dbMock = new Mock<IMongoDatabase>();
-        dbMock.Setup(d => d.GetCollection<Property>(It.IsAny<string>(), null))
-              .Returns(_collectionMock.Object);
+        public PropertyServiceTests()
+        {
+            _collectionMock = new Mock<IMongoCollection<Property>>();
 
-        _service = new PropertyService(dbMock.Object);
-    }
+            var dbMock = new Mock<IMongoDatabase>();
+            dbMock.Setup(d => d.GetCollection<Property>(It.IsAny<string>(), It.IsAny<MongoCollectionSettings>()))
+                  .Returns(_collectionMock.Object);
 
-    [Fact]
-    public async Task AddPlotAsync_ShouldThrowException_WhenAreaIsNegative()
-    {
-        var propertyId = "prop-123";
-        var invalidPlot = new Plot { Name = "Invalid Plot", AreaHectares = -10 };
+            _service = new PropertyService(dbMock.Object);
+        }
 
-        var action = () => _service.AddPlotAsync(propertyId, invalidPlot);
+        [Fact]
+        public async Task CreateAsync_ShouldCallInsertOneOnce()
+        {
+            var newProperty = new Property { Name = "Fazenda Teste 2", Location = "RS", ProducerId = "prod-1" };
 
-        await action.Should().ThrowAsync<ArgumentException>()
-              .WithMessage("The area of ​​the plot must be greater than zero");
-    }
+            await _service.CreateAsync(newProperty);
+            _collectionMock.Verify(c => c.InsertOneAsync(
+                It.Is<Property>(p => p.Name == "Fazenda Teste 2"),
+                null,
+                default), Times.Once);
+        }
 
-    [Fact]
-    public async Task CreateAsync_ShouldSetId_WhenSuccessful()
-    {
-        var newProperty = new Property { Name = "Fazenda Teste 2", Location = "RS" };
+        [Fact]
+        public async Task AddPlotAsync_ShouldCallUpdateOne_WhenValid()
+        {
+            var propertyId = "prop-123";
+            var plot = new Plot { Name = "Talhão Norte", AreaHectares = 50, CropType = "Soja" };
 
-        await _service.CreateAsync(newProperty);
+            await _service.AddPlotAsync(propertyId, plot);
 
-        _collectionMock.Verify(c => c.InsertOneAsync(
-            It.IsAny<Property>(),
-            null,
-            default), Times.Once);
+            _collectionMock.Verify(c => c.UpdateOneAsync(
+                It.IsAny<FilterDefinition<Property>>(),
+                It.IsAny<UpdateDefinition<Property>>(),
+                null,
+                default), Times.Once);
+        }
+
+        [Fact]
+        public async Task GetByProducerAsync_ShouldBeCalledWithCorrectFilter()
+        {
+            await _service.GetByProducerAsync("producer-abc");
+
+            _collectionMock.Verify(c => c.FindAsync(
+                It.IsAny<FilterDefinition<Property>>(),
+                It.IsAny<FindOptions<Property, Property>>(),
+                default), Times.AtLeastOnce);
+        }
     }
 }

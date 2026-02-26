@@ -30,11 +30,18 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
-// MongoDB configuration
+builder.Services.Configure<MongoDbSettings>(
+    builder.Configuration.GetSection("MongoDbSettings"));
+
 var mongoSettings = builder.Configuration.GetSection("MongoDbSettings").Get<MongoDbSettings>();
+
+if (mongoSettings == null || string.IsNullOrEmpty(mongoSettings.ConnectionString))
+{
+    throw new Exception("Erro: Seção MongoDbSettings não encontrada no appsettings.json ou ConnectionString vazia.");
+}
+
 var client = new MongoClient(mongoSettings.ConnectionString);
 var database = client.GetDatabase(mongoSettings.DatabaseName);
-
 builder.Services.AddSingleton<IMongoDatabase>(database);
 
 builder.Services.AddScoped<IPropertyService, PropertyService>();
