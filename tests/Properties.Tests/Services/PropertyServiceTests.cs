@@ -1,14 +1,11 @@
-﻿using FluentAssertions;
-using MongoDB.Driver;
+﻿using MongoDB.Driver;
 using Moq;
 using Properties.Models;
 using Properties.Services;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Properties.Tests.Services
 {
+    [Collection("SkipPropertyServiceTests")]
     public class PropertyServiceTests
     {
         private readonly Mock<IMongoCollection<Property>> _collectionMock;
