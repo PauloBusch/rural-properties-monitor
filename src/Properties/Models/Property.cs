@@ -24,8 +24,8 @@ public class Property
 
 public class Plot
 {
-    [BsonId] 
-    [BsonRepresentation(BsonType.ObjectId)]
+
+    [BsonElement("idPlot")]
     public string? Id { get; set; }
 
     [BsonElement("name")]

@@ -30,7 +30,7 @@ public class DashboardService : IDashboardService
 
         var allPlotIds = properties
             .SelectMany(p => p.Plots)
-            .Select(p => p.PlotId)
+            .Select(p => p.IdPlot)
             .ToList();
 
         var sensorData = await _ingressApiClient
@@ -52,11 +52,11 @@ public class DashboardService : IDashboardService
 
                 Plots = property.Plots.Select(plot =>
                 {
-                    sensorDictionary.TryGetValue(plot.PlotId, out var sensor);
+                    sensorDictionary.TryGetValue(plot.IdPlot, out var sensor);
 
                     return new PlotDashboardDto
                     {
-                        PlotId = plot.PlotId,
+                        PlotId = plot.IdPlot,
                         PlotName = plot.Name,
                         CropType = plot.CropType,
                         AreaHectares = plot.AreaHectares,

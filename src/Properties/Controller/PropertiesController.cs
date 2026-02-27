@@ -73,7 +73,7 @@ public class PropertiesController : ControllerBase
 
         var plot = new Plot
         {
-            Id = MongoDB.Bson.ObjectId.GenerateNewId().ToString(),
+            Id = dto.IdPlot,
             Name = dto.Name,
             CropType = dto.CropType,
             AreaHectares = dto.AreaHectares

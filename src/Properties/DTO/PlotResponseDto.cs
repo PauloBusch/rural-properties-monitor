@@ -5,5 +5,5 @@ public class PlotResponseDto
     public string Name { get; set; } = null!;
     public string CropType { get; set; } = null!;
     public double AreaHectares { get; set; }
-    public string? IdPlot { get; internal set; }
+    public string IdPlot { get; set; }
 }

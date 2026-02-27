@@ -12,4 +12,5 @@ public class PlotCreateDto
 
     [Range(0.1, 10000)]
     public double AreaHectares { get; set; }
+    public string IdPlot { get; set; }
 }
