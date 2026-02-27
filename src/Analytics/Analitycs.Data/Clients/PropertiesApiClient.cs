@@ -17,7 +17,7 @@ public class PropertiesApiClient : IPropertiesApiClient
     {
         var accessToken = await _keycloakTokenService.GetAccessTokenAsync(cancellationToken);
 
-        var url = $"https://localhost:44325/api/Properties/producer/{producerId}";
+        var url = $"api/Properties/producer/{producerId}";
         using var request = new HttpRequestMessage(HttpMethod.Get, url);        
 
         request.Headers.Authorization =

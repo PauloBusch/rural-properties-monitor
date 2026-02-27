@@ -45,7 +45,13 @@ public static class DependencyInjection
             });
 
         // Client para PropertiesApi
-        services.AddHttpClient<IPropertiesApiClient, PropertiesApiClient>()
+        var propertiesBaseUrl = configuration["Services:PropertiesApi"]
+            ?? throw new InvalidOperationException("PropertiesApi URL not configured");
+
+        services.AddHttpClient<IPropertiesApiClient, PropertiesApiClient>(client =>
+            {
+                client.BaseAddress = new Uri(propertiesBaseUrl);
+            })
             .AddResilienceHandler("properties-pipeline", builder =>
             {
                 builder.AddRetry(new HttpRetryStrategyOptions

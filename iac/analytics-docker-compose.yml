@@ -13,6 +13,7 @@ services:
     environment:
       - Redis__ConnectionString=redis:6379
       - Services__IngressApi=http://ingress:8080/api/
+      - Services__PropertiesApi=http://properties-service:8080/
       - Keycloak__TokenUrl=http://keycloak:8080/realms/RuralTech/protocol/openid-connect/token
       - Keycloak__ClientId=ruraltech-services
       - Keycloak__ClientSecret=${KEYCLOAK_CLIENT_SECRET}
